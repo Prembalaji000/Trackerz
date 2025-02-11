@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">PortfolioApplication</string>
+    <string name="client_id">577596068416-fbtgti0m2r41fh00ikf5nvph520h8jiu.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">1139691464029406</string>
+    <string name="facebook_client_token">3f5e3aa0f92d24fd0be8a19e710f751f</string>
+    <string name="fb_login_protocol_scheme">fb1139691464029406</string>
+</resources>
