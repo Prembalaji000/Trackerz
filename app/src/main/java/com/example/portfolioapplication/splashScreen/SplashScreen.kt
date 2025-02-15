@@ -1,5 +1,6 @@
 package com.example.portfolioapplication.splashScreen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -70,6 +71,13 @@ fun SplashScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.img),
+            contentDescription = "logo",
+            modifier = Modifier
+                .size(110.dp),
+            )
+        Spacer(modifier = Modifier.padding(8.dp))
         Text(
             textAlign = TextAlign.Center,
             text = "MY PORTFOLIO",
@@ -78,7 +86,7 @@ fun SplashScreen(
             fontFamily = customFont,
             fontSize = 24.sp,
         )
-        Spacer(modifier = Modifier.padding(26.dp))
+        Spacer(modifier = Modifier.padding(22.dp))
         LinearProgressIndicator(
             modifier = Modifier
                 .height(2.dp)

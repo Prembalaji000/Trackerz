@@ -549,7 +549,7 @@ fun AnimatedLoader(
                 LottieAnimation(
                     composition = preLoaderLottieAnimation,
                     progress = preLoaderProgress,
-                    modifier = modifier.size(90.dp),
+                    modifier = modifier.size(100.dp),
                     contentScale = ContentScale.Fit,
                 )
                 Spacer(modifier = Modifier.padding(4.dp))

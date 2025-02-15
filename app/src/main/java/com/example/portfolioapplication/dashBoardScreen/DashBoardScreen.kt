@@ -106,18 +106,34 @@ fun DashBoardScreen(
                 .padding(horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.padding(28.dp))
-            Text(
-                text = "MY PORTFOLIO",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontFamily = customFont,
-                fontSize = 24.sp,
+            Spacer(modifier = Modifier.padding(24.dp))
+            Row(
                 modifier = Modifier
-                    .padding(top = 10.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.padding(30.dp))
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.weight(1f))
+                Text(
+                    text = "MY PORTFOLIO",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = customFont,
+                    fontSize = 24.sp,
+                    modifier = Modifier.weight(2f),
+                    textAlign = TextAlign.Center
+                )
+                Image(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(start = 24.dp)
+                        .weight(1f),
+                    painter = painterResource(id = R.drawable.ic_settings),
+                    contentDescription = "setting_icon",
+                    contentScale = ContentScale.Fit,
+                )
+            }
+            Spacer(modifier = Modifier.padding(22.dp))
             todoList.let { list->
                 val totalAmounts = (list ?: emptyList()).sumOf { it.totalAmount }
                 CircularProgress(totalAmount = totalAmount, amounts = totalAmounts, totalAmountColumn = totalAmountColumn)
