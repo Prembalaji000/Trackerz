@@ -40,7 +40,6 @@ class SignUpViewModel() : ViewModel(){
                             _loginState.update { it.copy(isLoading = false) }
                             navController.navigate(Screens.LoginScreen)
                         }
-
                     } else {
                         _loginState.update { it.copy(isLoading = false) }
                         Toast.makeText(context,task.exception?.message ?: "Sign up failed",Toast.LENGTH_LONG).show()

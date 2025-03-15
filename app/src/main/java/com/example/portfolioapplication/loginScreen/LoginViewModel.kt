@@ -34,6 +34,10 @@ class LoginViewModel(context: Context, private val preference: sharedPreference)
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val name = email.substringBefore("@")
+                    preference.setUserName(name)
+                    preference.setUserEmailId(email)
+                    preference.setUserImageUrl("")
                     if (isAddedRememberMe){
                         preference.setEmail(email)
                         preference.setPassword(password)

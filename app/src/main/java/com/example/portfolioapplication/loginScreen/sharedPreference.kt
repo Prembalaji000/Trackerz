@@ -12,6 +12,9 @@ class sharedPreference(context: Context){
         private const val KEY_EMAIL = "emailId"
         private const val KEY_PASSWORD = "Password"
         private const val KEY_CHECK_REMEMBER_ME = "checkRememberMe"
+        private const val KEY_USER_NAME = "userName"
+        private const val KEY_USER_EMAIL = "userEmail"
+        private const val KEY_USER_IMAGE_URL = "userImageUrl"
     }
 
     fun clearCredentials() {
@@ -45,14 +48,46 @@ class sharedPreference(context: Context){
     }
 
     fun getEmail() :String?{
-        return sharedPref.getString("emailId","")
+        return sharedPref.getString(KEY_EMAIL,"")
     }
 
     fun getPassword() : String?{
-        return sharedPref.getString("Password", "")
+        return sharedPref.getString(KEY_PASSWORD, "")
     }
 
     fun getCheckRememberMe() : Boolean{
-        return sharedPref.getBoolean("checkRememberMe",false)
+        return sharedPref.getBoolean(KEY_CHECK_REMEMBER_ME,false)
     }
+
+    fun setUserName(userName : String){
+        sharedPref.edit {
+            putString(KEY_USER_NAME, userName)
+        }
+    }
+
+    fun getUserName() : String?{
+        return sharedPref.getString(KEY_USER_NAME,"")
+    }
+
+    fun setUserEmailId(userEmailId : String){
+        sharedPref.edit {
+            putString(KEY_USER_EMAIL, userEmailId)
+        }
+    }
+
+    fun getUserEmailId() : String?{
+        return sharedPref.getString(KEY_USER_EMAIL,"")
+    }
+
+    fun setUserImageUrl(userImageUrl : String){
+        println("setUserImageUrl : $userImageUrl")
+        sharedPref.edit {
+            putString(KEY_USER_IMAGE_URL, userImageUrl)
+        }
+    }
+
+    fun getUserImageUrl() : String?{
+        return sharedPref.getString(KEY_USER_IMAGE_URL,"")
+    }
+
 }

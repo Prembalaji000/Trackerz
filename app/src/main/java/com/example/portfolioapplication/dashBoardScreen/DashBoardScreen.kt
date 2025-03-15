@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -84,9 +85,10 @@ fun DashBoardScreen(
     modifier: Modifier,
     addButtonClick: (String, Int) -> Unit,
     todoList: List<Todo>?,
-    deleteBottonClick: (Int) -> Unit,
+    deleteButtonClick: (Int) -> Unit,
     totalAmount: (Int) -> Unit,
-    totalAmountColumn: Int
+    totalAmountColumn: Int,
+    settingButton: () -> Unit
 ){
     println("totalAmount: ${totalAmountColumn}")
     val customFont = FontFamily(
@@ -126,11 +128,15 @@ fun DashBoardScreen(
                 Image(
                     modifier = Modifier
                         .size(30.dp)
+                        .clickable {
+                            settingButton()
+                        }
                         .padding(start = 24.dp)
                         .weight(1f),
                     painter = painterResource(id = R.drawable.ic_settings),
                     contentDescription = "setting_icon",
                     contentScale = ContentScale.Fit,
+                    colorFilter = ColorFilter.tint(Color.White)
                 )
             }
             Spacer(modifier = Modifier.padding(22.dp))
@@ -150,7 +156,7 @@ fun DashBoardScreen(
                     TodoItem(
                         name = item.title,
                         amount = item.amount,
-                        onDelete = { deleteBottonClick(item.id) }
+                        onDelete = { deleteButtonClick(item.id) }
                     )
                 }
             }
@@ -190,7 +196,7 @@ fun BottomSheetContent(
     addButtonClick: (String, Int) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf(0) }
+    var amount by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
     val nameInteractionSource = remember { MutableInteractionSource() }
@@ -225,7 +231,7 @@ fun BottomSheetContent(
             shape = RoundedCornerShape(10.dp),
             textStyle = TextStyle(
                 fontSize = 12.sp,
-                color = Color.Black
+                color = Grey50
             ),
         )
         Spacer(modifier = Modifier.padding(6.dp))
@@ -243,11 +249,11 @@ fun BottomSheetContent(
                 .onFocusEvent {
                     isFocused = it.isFocused
                 },
-            value = amount.toString(),
+            value = amount,
             onValueChange = { amounts ->
                 val parsedAmount = amounts.toIntOrNull()
                 if (parsedAmount != null) {
-                    amount = parsedAmount
+                    amount = parsedAmount.toString()
                     errorMessage = ""
                 } else {
                     errorMessage = "Invalid input, please enter a number"
@@ -263,7 +269,7 @@ fun BottomSheetContent(
             shape = RoundedCornerShape(10.dp),
             textStyle = TextStyle(
                 fontSize = 12.sp,
-                color = Color.Black
+                color = Grey50
             )
 
         )
@@ -289,8 +295,8 @@ fun BottomSheetContent(
                     shape = RoundedCornerShape(25.dp)
                 )
                 .clickable {
-                    addButtonClick(name, amount)
-                    amount = 0
+                    addButtonClick(name, amount.toInt())
+                    amount = ""
                     name = ""
                 },
             contentAlignment = Alignment.Center
@@ -311,7 +317,7 @@ fun BottomSheetContent(
 @Preview
 @Composable
 fun Preview(){
-    DashBoardScreen(modifier = Modifier, addButtonClick = { _, _ -> }, todoList = null, deleteBottonClick = {}, totalAmount = {}, totalAmountColumn = 0)
+    DashBoardScreen(modifier = Modifier, addButtonClick = { _, _ -> }, todoList = null, deleteButtonClick = {}, totalAmount = {}, totalAmountColumn = 0, settingButton = {})
 }
 
 @Composable
@@ -532,8 +538,8 @@ fun TodoList(todoList: List<Todo>?, deleteBottonClick: (Int) -> Unit) {
             content = {
                 itemsIndexed(it) { index: Int, item: Todo ->
                     TodoItem(
-                        name = item.title, // Assuming 'title' is the name of the Todo item
-                        amount = item.amount, // Assuming there's a description
+                        name = item.title,
+                        amount = item.amount,
                         onDelete = {
                             deleteBottonClick(item.id)
                         }
@@ -578,7 +584,7 @@ fun TodoItem(name: String, amount: Int, onDelete: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            if (name == "EMI" || name == "RD"){
+            if (name!="kite" && name!="coin"){
                 Image(
                     painter = painterResource(id = R.drawable.bank_logo),
                     contentDescription = "Logo for $name", // Dynamic description

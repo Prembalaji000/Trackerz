@@ -18,4 +18,7 @@ sealed interface Screens {
     @Serializable
     data object DashBoardScreen : Screens
 
+    @Serializable
+    data object SettingScreen : Screens
+
 }

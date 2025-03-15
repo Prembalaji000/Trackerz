@@ -3,6 +3,10 @@ package com.example.portfolioapplication
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.ExifInterface
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -39,6 +43,10 @@ import com.example.portfolioapplication.loginScreen.LoginScreen
 import com.example.portfolioapplication.loginScreen.LoginViewModel
 import com.example.portfolioapplication.loginScreen.LoginViewModelFactory
 import com.example.portfolioapplication.loginScreen.sharedPreference
+import com.example.portfolioapplication.settingScreen.SettingRouter
+import com.example.portfolioapplication.settingScreen.SettingScreen
+import com.example.portfolioapplication.settingScreen.SettingViewModel
+import com.example.portfolioapplication.settingScreen.SettingViewModelFactory
 import com.example.portfolioapplication.signUpScreen.SignUpRouter
 import com.example.portfolioapplication.signUpScreen.SignUpScreen
 import com.example.portfolioapplication.signUpScreen.SignUpViewModel
@@ -171,7 +179,23 @@ fun Navigation(
             val viewModel: DashBoardViewModel = viewModel(
                 factory = DashBoardViewModelFactory(todoDao, context)
             )
-            DashBoardRouter(viewModel = viewModel, modifier = modifier)
+            val loginViewModel: LoginViewModel = viewModel(
+                factory = LoginViewModelFactory(context)
+            )
+            DashBoardRouter(viewModel = viewModel, modifier = modifier, loginViewModel = loginViewModel)
+        }
+        composable<Screens.SettingScreen>{
+            val todoDao = MainApplication.todoDatabase.getTodoDao()
+            val viewModel: SettingViewModel = viewModel(
+                factory = SettingViewModelFactory()
+            )
+            val dashBoardViewModel: DashBoardViewModel = viewModel(
+                factory = DashBoardViewModelFactory(todoDao, context)
+            )
+            val loginViewModel: LoginViewModel = viewModel(
+                factory = LoginViewModelFactory(context)
+            )
+            SettingRouter(viewModel = viewModel,dashBoardViewModel = dashBoardViewModel, loginViewModel = loginViewModel, modifier = modifier)
         }
     }
 }
@@ -183,4 +207,28 @@ fun SetStatusBarColor() {
     SideEffect {
         systemUiController.setSystemBarsColor(color = bgColor )
     }
+}
+
+
+fun Context.fixImageRotation(uri: Uri, bitmap: Bitmap): Bitmap {
+    contentResolver.openInputStream(uri)?.use { inputStream ->
+        val exif = ExifInterface(inputStream)
+        val orientation = exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+
+        val rotationDegrees = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+            else -> 0f
+        }
+
+        if (rotationDegrees == 0f) return bitmap
+
+        val matrix = Matrix().apply { postRotate(rotationDegrees) }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+    return bitmap
 }

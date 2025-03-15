@@ -19,6 +19,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.Screens
+import com.example.portfolioapplication.loginScreen.sharedPreference
 import com.example.portfolioapplication.signUpScreen.LoginState
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -45,6 +46,12 @@ class AuthViewModel() : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
     val authState = _authState.asStateFlow()
+    private val _userDetail = MutableStateFlow<LoginCredential?>(null)
+    val userDetail = _userDetail.asStateFlow()
+
+    fun setUserDetail(user: LoginCredential) {
+        _userDetail.value = user
+    }
 
     fun googleSignIn(
         context: Context,
@@ -52,6 +59,7 @@ class AuthViewModel() : ViewModel() {
         launcher: ActivityResultLauncher<Intent>?,
         onNavigate: (Screens) -> Unit
     ) {
+        val preference = sharedPreference(context)
         val credentialManager = CredentialManager.create(context)
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(getCredentialOptions(context))
@@ -69,6 +77,14 @@ class AuthViewModel() : ViewModel() {
                             val user = Firebase.auth.signInWithCredential(authCredential).await().user
                             user?.let {
                                 if (!it.isAnonymous) {
+                                    setUserDetail(user = LoginCredential(
+                                        userName = user.displayName,
+                                        userEmail = user.email,
+                                        userImageUrl = user.photoUrl?.toString()
+                                    ))
+                                    preference.setUserName(user.displayName?:"")
+                                    preference.setUserEmailId(user.email?:"")
+                                    preference.setUserImageUrl(user.photoUrl?.toString()?:"")
                                     viewModelScope.launch {
                                         delay(4000)
                                         _authState.update { state ->
@@ -118,6 +134,7 @@ class AuthViewModel() : ViewModel() {
     }
 
     fun loginWithFacebook(context: Context, onNavigate: (Screens) -> Unit, callbackManager: CallbackManager) {
+        val preference = sharedPreference(context)
         val loginManager = LoginManager.getInstance()
         loginManager.logInWithReadPermissions(context as Activity, listOf("email", "public_profile"))
         loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
@@ -134,6 +151,9 @@ class AuthViewModel() : ViewModel() {
                                 val name = user?.displayName
                                 val email = user?.email
                                 val uid = user?.uid
+                                preference.setUserName(user?.displayName?:"")
+                                preference.setUserEmailId(user?.email?:"")
+                                preference.setUserImageUrl(user?.photoUrl?.toString()?:"")
                                 println("Firebase Auth Success: $name, $email, $uid")
                                 viewModelScope.launch {
                                     delay(4000)
@@ -163,4 +183,11 @@ class AuthViewModel() : ViewModel() {
 
 data class AuthState(
     var isLoading: Boolean = false,
+)
+
+
+data class LoginCredential(
+    var userName : String?,
+    var userEmail : String?,
+    var userImageUrl : String?
 )

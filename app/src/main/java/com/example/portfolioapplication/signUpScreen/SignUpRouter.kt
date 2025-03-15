@@ -59,7 +59,7 @@ fun SignUpRouter(
             val viewModels: DashBoardViewModel = viewModel(
                 factory = DashBoardViewModelFactory(todoDao = todoDao, context = context)
             )
-            DashBoardRouter(viewModel = viewModels, modifier = modifier)
+            DashBoardRouter(viewModel = viewModels, modifier = modifier, loginViewModel = loginViewModel)
         }
     }
 }

@@ -23,6 +23,7 @@ googleid = "1.1.1"
 firebaseBom = "33.3.0"
 gmsGoogleServices = "4.4.2"
 firebaseAuth = "23.2.0"
+volley = "1.2.1"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
@@ -58,6 +59,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
+volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
