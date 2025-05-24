@@ -15,6 +15,7 @@ class sharedPreference(context: Context){
         private const val KEY_USER_NAME = "userName"
         private const val KEY_USER_EMAIL = "userEmail"
         private const val KEY_USER_IMAGE_URL = "userImageUrl"
+        private const val KEY_DARK_MODE = "dark_mode"
     }
 
     fun clearCredentials() {
@@ -22,6 +23,14 @@ class sharedPreference(context: Context){
             remove(KEY_EMAIL)
             remove(KEY_PASSWORD)
             remove(KEY_CHECK_REMEMBER_ME)
+            apply()
+        }
+    }
+
+    fun clearUserCredentials(){
+        with(sharedPref.edit()){
+            remove(KEY_USER_NAME)
+            remove(KEY_USER_IMAGE_URL)
             apply()
         }
     }
@@ -63,6 +72,7 @@ class sharedPreference(context: Context){
         sharedPref.edit {
             putString(KEY_USER_NAME, userName)
         }
+        println("setUserName : $userName")
     }
 
     fun getUserName() : String?{
@@ -73,6 +83,7 @@ class sharedPreference(context: Context){
         sharedPref.edit {
             putString(KEY_USER_EMAIL, userEmailId)
         }
+        println("setUserEmailId : $userEmailId")
     }
 
     fun getUserEmailId() : String?{
@@ -80,14 +91,24 @@ class sharedPreference(context: Context){
     }
 
     fun setUserImageUrl(userImageUrl : String){
-        println("setUserImageUrl : $userImageUrl")
         sharedPref.edit {
             putString(KEY_USER_IMAGE_URL, userImageUrl)
         }
+        println("setUserImageUrl : $userImageUrl")
     }
 
     fun getUserImageUrl() : String?{
         return sharedPref.getString(KEY_USER_IMAGE_URL,"")
     }
 
+    fun setDarkModeEnabled(isEnabled: Boolean) {
+        sharedPref.edit {
+            putBoolean(KEY_DARK_MODE, isEnabled)
+        }
+        println("setDarkModeEnabled : $isEnabled")
+    }
+
+    fun isDarkModeEnabled(): Boolean {
+        return sharedPref.getBoolean(KEY_DARK_MODE, false)
+    }
 }

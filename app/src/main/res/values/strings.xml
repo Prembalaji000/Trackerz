@@ -1,7 +1,23 @@
 <resources>
-    <string name="app_name">PortfolioApplication</string>
+    <string name="app_name">Trackerz</string>
     <string name="client_id">577596068416-fbtgti0m2r41fh00ikf5nvph520h8jiu.apps.googleusercontent.com</string>
     <string name="facebook_app_id">1139691464029406</string>
     <string name="facebook_client_token">3f5e3aa0f92d24fd0be8a19e710f751f</string>
     <string name="fb_login_protocol_scheme">fb1139691464029406</string>
+    <string name="app_title">TRACKERZ</string>
+    <string name="add_subscription">Add Subscription</string>
+    <string name="add_subscription_">Add Subscription!</string>
+    <string name="enter_title">Enter title</string>
+    <string name="enter_amount">Enter amount</string>
+    <string name="edit_amount">Edit Amount</string>
+    <string name="save_button">Save</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="title">TRACKIZER</string>
+    <string name="sub_title">This month bills</string>
+    <string name="setting">Setting</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="edit_name">Edit name</string>
+    <string name="edit_photo">Edit photo</string>
+    <string name="done">Done</string>
 </resources>

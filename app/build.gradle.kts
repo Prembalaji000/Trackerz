@@ -53,7 +53,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,6 +64,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.volley)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,22 +80,18 @@ dependencies {
     implementation (libs.androidx.room.ktx)
     implementation (libs.kotlinx.coroutines.core)
     implementation (libs.kotlinx.coroutines.android)
-
-
-    //GoogleSSo
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
-
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.google.firebase.auth)
-
-    //Facebook
     implementation (libs.facebook.login)
-
-    //lottie animation
     implementation (libs.lottie.compose)
+    implementation(libs.coil.compose)
+    implementation (libs.androidx.material)
+    implementation (libs.accompanist.swiperefresh)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.accompanist.navigation.animation)
 
-    implementation("io.coil-kt:coil-compose:2.5.0")
 }

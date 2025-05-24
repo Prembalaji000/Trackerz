@@ -1,6 +1,5 @@
 package com.example.portfolioapplication
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -9,46 +8,47 @@ import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
+import android.text.TextUtils
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.portfolioapplication.authScreen.AuthScreen
+import com.codewithfk.expensetracker.android.feature.add_expense.AddExpenseViewModel
 import com.example.portfolioapplication.authScreen.AuthScreenRouter
 import com.example.portfolioapplication.authScreen.AuthViewModel
 import com.example.portfolioapplication.authScreen.AuthViewModelFactory
 import com.example.portfolioapplication.dashBoardScreen.DashBoardRouter
-import com.example.portfolioapplication.dashBoardScreen.DashBoardScreen
 import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModel
 import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModelFactory
-import com.example.portfolioapplication.dashBoardScreen.MainApplication
+import com.example.portfolioapplication.homeScreen.HomeScreenRouter
+import com.example.portfolioapplication.homeScreen.HomeScreenViewModel
+import com.example.portfolioapplication.homeScreen.HomeScreenViewModelFactor
+import com.example.portfolioapplication.homeScreen.add_expense.AddExpenseScreenRouter
+import com.example.portfolioapplication.homeScreen.transactionlist.TransactionListScreenRouter
 import com.example.portfolioapplication.loginScreen.LoginRouter
-import com.example.portfolioapplication.loginScreen.LoginScreen
 import com.example.portfolioapplication.loginScreen.LoginViewModel
 import com.example.portfolioapplication.loginScreen.LoginViewModelFactory
 import com.example.portfolioapplication.loginScreen.sharedPreference
 import com.example.portfolioapplication.settingScreen.SettingRouter
-import com.example.portfolioapplication.settingScreen.SettingScreen
 import com.example.portfolioapplication.settingScreen.SettingViewModel
 import com.example.portfolioapplication.settingScreen.SettingViewModelFactory
 import com.example.portfolioapplication.signUpScreen.SignUpRouter
-import com.example.portfolioapplication.signUpScreen.SignUpScreen
 import com.example.portfolioapplication.signUpScreen.SignUpViewModel
 import com.example.portfolioapplication.signUpScreen.SignUpViewModelFactory
 import com.example.portfolioapplication.splashScreen.SplashScreen
@@ -61,11 +61,13 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var callbackManager: CallbackManager
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,13 +80,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PortfolioApplicationTheme {
-                SetStatusBarColor()
+                SetStatusBarColor(context = this)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Navigation(
                         context = this,
                         modifier = Modifier.padding(innerPadding),
                         callbackManager = callbackManager,
-                        preference = sharedPreference(this)
+                        preference = sharedPreference(this),
                     )
                 }
             }
@@ -118,11 +120,7 @@ fun Navigation(
     NavHost(
         modifier = Modifier,
         navController = navController,
-        startDestination = Screens.SplashScreen,
-        enterTransition = { slideInHorizontally { it } },
-        exitTransition = { slideOutHorizontally { -it } },
-        popEnterTransition = { slideInHorizontally { -it } },
-        popExitTransition = { slideOutHorizontally { it } }
+        startDestination = Screens.SplashScreen
     ) {
         composable<Screens.SplashScreen>{
             SplashScreen(
@@ -131,47 +129,47 @@ fun Navigation(
                 preference = preference
             )
         }
-        composable<Screens.AuthScreen>{
+        composable<Screens.AuthScreen>(
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ){
             val viewModel: AuthViewModel = viewModel(
                 factory = AuthViewModelFactory()
-            )
-            val signUpViewModel: SignUpViewModel = viewModel(
-                factory = SignUpViewModelFactory()
-            )
-            val loginViewModel: LoginViewModel = viewModel(
-                factory = LoginViewModelFactory(context)
             )
             AuthScreenRouter(
                 viewModel = viewModel,
                 context = context,
                 modifier = modifier,
                 callbackManager = callbackManager,
-                signUpViewModel = signUpViewModel,
-                loginViewModel = loginViewModel
+                navController = navController
             )
         }
-        composable<Screens.LoginScreen>{
+        composable<Screens.LoginScreen>(
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ){
             val loginViewModel: LoginViewModel = viewModel(
                 factory = LoginViewModelFactory(context)
             )
             LoginRouter(
                 viewModel = loginViewModel,
                 modifier = modifier,
+                navController = navController,
                 context = context
             )
         }
-        composable<Screens.SignUpScreen>{
+        composable<Screens.SignUpScreen>(
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ){
             val viewModel : SignUpViewModel = viewModel(
                 factory = SignUpViewModelFactory()
-            )
-            val loginViewModel: LoginViewModel = viewModel(
-                factory = LoginViewModelFactory(context)
             )
             SignUpRouter(
                 modifier = modifier,
                 viewModel = viewModel,
                 context = context,
-                loginViewModel = loginViewModel
+                navController = navController
             )
         }
         composable<Screens.DashBoardScreen> {
@@ -179,35 +177,78 @@ fun Navigation(
             val viewModel: DashBoardViewModel = viewModel(
                 factory = DashBoardViewModelFactory(todoDao, context)
             )
-            val loginViewModel: LoginViewModel = viewModel(
-                factory = LoginViewModelFactory(context)
+            DashBoardRouter(
+                viewModel = viewModel,
+                modifier = modifier,
+                navController = navController
             )
-            DashBoardRouter(viewModel = viewModel, modifier = modifier, loginViewModel = loginViewModel)
         }
-        composable<Screens.SettingScreen>{
-            val todoDao = MainApplication.todoDatabase.getTodoDao()
+        composable<Screens.SettingScreen>(
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ){
             val viewModel: SettingViewModel = viewModel(
-                factory = SettingViewModelFactory()
+                factory = SettingViewModelFactory(context)
             )
-            val dashBoardViewModel: DashBoardViewModel = viewModel(
-                factory = DashBoardViewModelFactory(todoDao, context)
+            SettingRouter(
+                viewModel = viewModel,
+                modifier = modifier,
+                navController = navController
             )
-            val loginViewModel: LoginViewModel = viewModel(
-                factory = LoginViewModelFactory(context)
+        }
+        composable<Screens.HomeScreen>(
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ) {
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val viewModel : HomeScreenViewModel = viewModel(
+                factory = HomeScreenViewModelFactor(expenseDao, context)
             )
-            SettingRouter(viewModel = viewModel,dashBoardViewModel = dashBoardViewModel, loginViewModel = loginViewModel, modifier = modifier)
+            val expenseViewModel = AddExpenseViewModel(dao = expenseDao)
+            HomeScreenRouter(
+                viewModel = viewModel,
+                expenseViewModel = expenseViewModel,
+                modifier = modifier,
+                navController = navController
+            )
+        }
+        composable<Screens.AddExpenseScreen>(
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ) {
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val viewModel = AddExpenseViewModel(dao = expenseDao)
+            AddExpenseScreenRouter(modifier = modifier, viewModel = viewModel)
+        }
+        composable<Screens.TransactionsScreen>(
+            enterTransition = { fadeIn(animationSpec = tween(700)) },
+            exitTransition = { fadeOut(animationSpec = tween(300)) }
+        ) {
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val viewModel = HomeScreenViewModel(dao = expenseDao, context)
+            TransactionListScreenRouter(
+                modifier = modifier,
+                viewModel = viewModel,
+                navController = navController
+            )
         }
     }
 }
 
 
 @Composable
-fun SetStatusBarColor() {
+fun SetStatusBarColor(context: Context) {
     val systemUiController = rememberSystemUiController()
-    SideEffect {
-        systemUiController.setSystemBarsColor(color = bgColor )
+    val preference = sharedPreference(context)
+    val isDarkMode = remember { mutableStateOf(preference.isDarkModeEnabled()) }
+
+    LaunchedEffect(isDarkMode.value) {
+        systemUiController.setSystemBarsColor(
+            color = if (isDarkMode.value) Color.White.copy(alpha = 0.4f) else bgColor
+        )
     }
 }
+
 
 
 fun Context.fixImageRotation(uri: Uri, bitmap: Bitmap): Bitmap {
@@ -231,4 +272,13 @@ fun Context.fixImageRotation(uri: Uri, bitmap: Bitmap): Bitmap {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
     return bitmap
+}
+
+fun String?.capitalizeFirstLetter(): String {
+    return if (TextUtils.isEmpty(this)) {
+        ""
+    } else {
+        this?.substring(0, 1)?.uppercase(Locale.getDefault()) + this?.substring(1)
+            ?.lowercase(Locale.getDefault())
+    }
 }

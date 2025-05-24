@@ -90,7 +90,7 @@ class AuthViewModel() : ViewModel() {
                                         _authState.update { state ->
                                             state.copy(isLoading = false)
                                         }
-                                        onNavigate(Screens.DashBoardScreen)
+                                        onNavigate(Screens.HomeScreen)
                                     }
                                 }
                             }
@@ -112,9 +112,11 @@ class AuthViewModel() : ViewModel() {
     fun navigateToLoginScreen(navController: NavController){
         _authState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            delay(4000)
+            delay(1000)
             _authState.update { it.copy(isLoading = false) }
-            navController.navigate(Screens.LoginScreen)
+            navController.navigate(Screens.LoginScreen){
+                popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+            }
         }
     }
 
@@ -158,7 +160,7 @@ class AuthViewModel() : ViewModel() {
                                 viewModelScope.launch {
                                     delay(4000)
                                     _authState.update { it.copy(isLoading = false) }
-                                    onNavigate(Screens.DashBoardScreen)
+                                    onNavigate(Screens.HomeScreen)
                                 }
                             } else {
                                 _authState.update { it.copy(isLoading = false) }

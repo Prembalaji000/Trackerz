@@ -1,5 +1,6 @@
 package com.example.portfolioapplication.loginScreen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -43,15 +45,15 @@ import androidx.compose.ui.unit.sp
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.signUpScreen.AnimatedLoader
 import com.example.portfolioapplication.signUpScreen.SignInButton
-import com.example.portfolioapplication.signUpScreen.StartButton
 import com.example.portfolioapplication.signUpScreen.TextField
 import com.example.portfolioapplication.ui.theme.bgColor
+import com.example.portfolioapplication.ui.theme.line
 
 
 @Preview
 @Composable
 fun LoginPreview(){
-    LoginScreen(modifier = Modifier, onButtonClick = {}, onLoginClick = {_,_ ->}, isAddedRememberMe = true, onAddedRememberMe = {  }, isLoading = true)
+    LoginScreen(modifier = Modifier, onButtonClick = {}, onLoginClick = {_,_ ->}, isAddedRememberMe = true, onAddedRememberMe = {  }, isLoading = false, isDarkMode = false)
 }
 
 @Composable
@@ -61,7 +63,8 @@ fun LoginScreen(
     onButtonClick: () -> Unit,
     onAddedRememberMe: (Boolean) -> Unit,
     isAddedRememberMe :Boolean,
-    isLoading : Boolean
+    isLoading : Boolean,
+    isDarkMode : Boolean
     ){
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
@@ -75,20 +78,34 @@ fun LoginScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(bgColor)
+            .background(color = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AnimatedLoader(isLoading = isLoading)
         Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "MY PORTFOLIO",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontFamily = customFont,
-            fontSize = 24.sp,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_expenses_icon),
+                contentDescription = "logo",
+                modifier = Modifier
+                    .size(30.dp),
+            )
+            Spacer(modifier = Modifier.padding(6.dp))
+            Text(
+                text = stringResource(id = R.string.app_title),
+                color = if (isDarkMode) bgColor else Color.White,
+                fontWeight = FontWeight.Bold,
+                fontFamily = customFont,
+                fontSize = 26.sp,
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -106,7 +123,9 @@ fun LoginScreen(
             RememberMeForgotPasswordRow(
                 modifier = Modifier,
                 onAddedRememberMe = onAddedRememberMe,
-                isAddedRememberMe = isAddedRememberMe)
+                isAddedRememberMe = isAddedRememberMe,
+                isDarkMode = isDarkMode
+            )
             Spacer(modifier = Modifier.height(16.dp))
             LoginButton(
                 text = "Sign In",
@@ -128,9 +147,10 @@ fun LoginScreen(
                 color = Color.White
             )
             Spacer(modifier = Modifier.height(16.dp))
-            SignInButton(
+            SignUpButton(
                 text = "Sign Up",
-                onButtonClick = onButtonClick
+                onButtonClick = onButtonClick,
+                isDarkMode = isDarkMode
             )
         }
     }
@@ -141,6 +161,7 @@ fun RememberMeForgotPasswordRow(
     modifier: Modifier = Modifier,
     onAddedRememberMe: (Boolean) -> Unit,
     isAddedRememberMe :Boolean,
+    isDarkMode : Boolean
 ) {
     var rememberMeChecked by remember { mutableStateOf(false) }
 
@@ -166,14 +187,14 @@ fun RememberMeForgotPasswordRow(
             Text(
                 text = "Remember me",
                 fontSize = 14.sp,
-                color = Color.Gray,
+                color = if (isDarkMode) Color.Black else Color.Gray,
                 fontWeight = FontWeight.Medium,
             )
         }
 
         Text(
             text = "Forgot password",
-            color = Color.Gray,
+            color = if (isDarkMode) Color.Black else Color.Gray,
             fontSize = 14.sp,
             modifier = Modifier
                 .clickable { /* Navigate to Forgot Password Screen */ }
@@ -193,16 +214,49 @@ fun LoginButton(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
+            .padding(horizontal = 2.dp)
             .height(50.dp)
             .clip(RoundedCornerShape(25.dp))
-            .background(brush = gradientBrush)
+            .background(line)
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.15f), Color.Black)),
                 shape = RoundedCornerShape(25.dp)
             )
             .clickable { onLoginClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = text,
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun SignUpButton(
+    text: String,
+    onButtonClick: () -> Unit,
+    isDarkMode: Boolean
+){
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp)
+            .height(50.dp)
+            .clip(RoundedCornerShape(25.dp))
+            .background(Color.DarkGray)
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.15f), Color.Black)),
+                shape = RoundedCornerShape(25.dp)
+            )
+            .clickable { onButtonClick() },
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

@@ -1,10 +1,9 @@
-package com.example.portfolioapplication.dashBoardScreen
+package com.example.portfolioapplication
 
 import android.app.Application
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.todoroomdb.db.TodoDatabase
+import com.example.portfolioapplication.db.TodoDatabase
+import com.example.portfolioapplication.di.ExpenseDatabase
 import com.facebook.CallbackManager
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
@@ -13,6 +12,7 @@ class MainApplication : Application(){
      companion object{
          lateinit var todoDatabase : TodoDatabase
          lateinit var callbackManager: CallbackManager
+         lateinit var expenseData : ExpenseDatabase
      }
 
     override fun onCreate() {
@@ -25,6 +25,11 @@ class MainApplication : Application(){
             applicationContext,
             TodoDatabase::class.java,
             TodoDatabase.NAME
+        ).build()
+        expenseData = Room.databaseBuilder(
+            applicationContext,
+            ExpenseDatabase::class.java,
+            ExpenseDatabase.DATABASE_NAME
         ).build()
     }
 }

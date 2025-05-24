@@ -25,17 +25,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,7 +72,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -74,18 +87,27 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.authScreen.LoginCredential
+import com.example.portfolioapplication.capitalizeFirstLetter
 import com.example.portfolioapplication.dashBoardScreen.BottomSheetContent
 import com.example.portfolioapplication.fixImageRotation
 import com.example.portfolioapplication.loginScreen.sharedPreference
+import com.example.portfolioapplication.signUpScreen.AnimatedLoader
 import com.example.portfolioapplication.ui.theme.Grey30
 import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
+import com.example.portfolioapplication.ui.theme.line
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
@@ -99,7 +121,10 @@ fun SettingPreview(){
         initialUserName = "User Name",
         userImageUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
         userEmail = "UserName@example.com",
-        addButtonClick = {_,_ ->}
+        addButtonClick = {_,_ ->},
+        isRefresh = true,
+        isDarkMode = false,
+        onThemeToggle = {}
     )
 }
 
@@ -107,43 +132,45 @@ fun SettingPreview(){
 @Composable
 fun SettingScreen(
     modifier: Modifier,
-    onBackButtonClick:() -> Unit,
-    onSignOut:() -> Unit,
-    initialUserName : String,
-    userImageUrl : String,
-    userEmail : String,
-    addButtonClick: (String, Uri?) -> Unit
-){
+    onBackButtonClick: () -> Unit,
+    onSignOut: () -> Unit,
+    initialUserName: String,
+    userImageUrl: String,
+    userEmail: String,
+    addButtonClick: (String, Uri?) -> Unit,
+    isRefresh: Boolean,
+    isDarkMode: Boolean,
+    onThemeToggle: () -> Unit
+) {
     var userName by remember { mutableStateOf(initialUserName) }
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        modifier = modifier
-            .fillMaxSize(),
-        containerColor = bgColor,
+        modifier = modifier.fillMaxSize(),
+        containerColor = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor,
         topBar = {
-            TopBar(onBackButtonClick = onBackButtonClick)
+            TopBar(onBackButtonClick = onBackButtonClick, isDarkMode = isDarkMode)
         },
         content = { paddingValue ->
+            AnimatedLoader(isLoading = isRefresh)
             Column(
-                modifier = modifier
-                    .padding(paddingValue),
-                verticalArrangement = Arrangement.Center,
+                modifier = modifier.padding(paddingValue),
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
                     ProfileView(
-                        userName = userName,
+                        userName = initialUserName,
                         userImageUrl = userImageUrl,
-                        userEmail = userEmail
+                        userEmail = userEmail,
+                        isDarkMode = isDarkMode
                     )
-                    Spacer(modifier = Modifier.padding(12.dp))
+                    Spacer(modifier = Modifier.padding(10.dp))
                     Button(
                         colors = ButtonColors(
                             containerColor = Grey30,
@@ -151,30 +178,73 @@ fun SettingScreen(
                             disabledContainerColor = Grey30,
                             disabledContentColor = Color.White
                         ),
-                        onClick = {
-                            scope.launch {
-                                showBottomSheet = true
-                            }
-                        }) {
+                        onClick = { scope.launch { showBottomSheet = true } }
+                    ) {
                         Text(
-                            text = "Edit Profile",
+                            text = stringResource(id = R.string.edit_profile),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
+                    Spacer(modifier = Modifier.padding(12.dp))
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(
+                                width = 1.dp,
+                                color = if (isDarkMode) Color.Black else Color.White.copy(alpha = 0.6f),
+                                shape = RoundedCornerShape(16.dp)
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Grey30
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp, horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.theme_mode),
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            Switch(
+                                checked = isDarkMode,
+                                onCheckedChange = { onThemeToggle() },
+                                colors = SwitchDefaults.colors(
+                                    checkedTrackColor = Color(0xFF4CAF50),
+                                    uncheckedTrackColor = Color(0xFF3A3A3C),
+                                    checkedThumbColor = Color.White,
+                                    uncheckedThumbColor = Color.White
+                                )
+                            )
+                        }
+                    }
                     if (showBottomSheet) {
                         ModalBottomSheet(
-                            containerColor = bgColor,
+                            containerColor = if (isDarkMode) Color.White else bgColor,
                             onDismissRequest = { showBottomSheet = false },
                             sheetState = sheetState
                         ) {
                             EditProfile(
                                 userName = userName,
                                 onClose = { showBottomSheet = false },
-                                addButtonClick = {name, amount->
+                                addButtonClick = { name, amount ->
                                     userName = name
-                                    addButtonClick(name,amount)
-                                }
+                                    addButtonClick(name, amount)
+                                },
+                                isDarkMode = isDarkMode
                             )
                         }
                     }
@@ -185,7 +255,7 @@ fun SettingScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 18.dp)
+                    .padding(bottom = 18.dp, start = 6.dp, end = 6.dp)
             ) {
                 SignOutButton(onSignOut = onSignOut)
             }
@@ -196,11 +266,14 @@ fun SettingScreen(
 @Preview
 @Composable
 fun Preview(){
-    TopBar(onBackButtonClick = {})
+    TopBar(onBackButtonClick = {}, isDarkMode = false)
 }
 
 @Composable
-fun TopBar(onBackButtonClick:() -> Unit){
+fun TopBar(onBackButtonClick:() -> Unit, isDarkMode: Boolean){
+    val customFont = FontFamily(
+        Font(R.font.exo2_extrabold, FontWeight.Normal)
+    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -216,13 +289,14 @@ fun TopBar(onBackButtonClick:() -> Unit){
             painter = painterResource(id = R.drawable.ic_back_button),
             contentDescription = "back_icon",
             contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(Color.White)
+            colorFilter = ColorFilter.tint(if (isDarkMode) bgColor else Color.White)
         )
         Text(
-            text = "Setting",
+            text = stringResource(id = R.string.setting),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            fontFamily = customFont,
+            color = if (isDarkMode) bgColor else Color.White,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.Center),
@@ -238,7 +312,8 @@ fun ProfilePreview(){
     ProfileView(
         userName = "User Name",
         userImageUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-        userEmail = "james.s.sherman@example-pet-store.com"
+        userEmail = "james.s.sherman@example-pet-store.com",
+        isDarkMode = false
     )
 }
 
@@ -247,7 +322,8 @@ fun ProfilePreview(){
 fun ProfileView(
     userName : String,
     userImageUrl : String,
-    userEmail : String
+    userEmail : String,
+    isDarkMode: Boolean
 ){
     val context = LocalContext.current
     println("userDetail: $userName, $userEmail $userImageUrl")
@@ -257,81 +333,32 @@ fun ProfileView(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val imageLoader = ImageLoader(context)
-        val request = ImageRequest.Builder(context)
-            .data(userImageUrl)
-            .build()
 
-        val drawableState = produceState<BitmapDrawable?>(initialValue = null) {
-            val result = imageLoader.execute(request)
-            if (result is SuccessResult) {
-                val originalBitmap = (result.drawable as? BitmapDrawable)?.bitmap
-                val rotatedBitmap = originalBitmap?.let { context.fixImageRotation(Uri.parse(userImageUrl), it) }
-                value = rotatedBitmap?.let { BitmapDrawable(context.resources, it) }
-            }
-        }
-
-        val imageBitmap = drawableState.value?.bitmap?.asImageBitmap()
-
-        val emptyImage = ImageBitmap.imageResource(id = R.drawable.ic_user)
-
-        Canvas(
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(userImageUrl)
+                .crossfade(true)
+                .build(),
+            imageLoader = imageLoader,
+            contentDescription = "Profile Image",
             modifier = Modifier
                 .size(150.dp)
                 .clip(CircleShape)
-        ) {
-            drawCircle(
-                color = Color.Gray,
-                radius = size.minDimension / 2
-            )
-
-            if (imageBitmap!= null){
-                imageBitmap.let { bitmap ->
-                    drawIntoCanvas { canvas ->
-                        val paint = Paint().apply {
-                            isAntiAlias = true
-                            filterQuality = FilterQuality.High
-                        }
-
-                        val imageSize = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
-                        val scale = min(size.width / imageSize.width, size.height / imageSize.height)
-                        val scaledSize = IntSize(
-                            (imageSize.width * scale).toInt(),
-                            (imageSize.height * scale).toInt()
-                        )
-                        val offsetX = ((size.width - scaledSize.width) / 2f).toInt()
-                        val offsetY = ((size.height - scaledSize.height) / 2f).toInt()
-
-                        canvas.drawImageRect(
-                            image = bitmap,
-                            srcOffset = IntOffset.Zero,
-                            srcSize = IntSize(bitmap.width, bitmap.height),
-                            dstOffset = IntOffset(offsetX, offsetY),
-                            dstSize = scaledSize,
-                            paint = paint
-                        )
-                    }
-                }
-            } else {
-                drawImage(
-                    image = emptyImage,
-                    topLeft = Offset(
-                        (size.width - emptyImage.width) / 2f,
-                        (size.height - emptyImage.height) / 2f
-                    )
-                )
-            }
-        }
+                .background(Color.Gray),
+            placeholder = painterResource(id = R.drawable.ic_user),
+            error = painterResource(id = R.drawable.ic_user)
+        )
 
         Spacer(modifier = Modifier.padding(12.dp))
 
         Text(
-            text = userName,
+            text = userName.capitalizeFirstLetter(),
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = if (isDarkMode) bgColor else Color.White,
             fontSize = 20.sp
         )
 
-        Spacer(modifier = Modifier.padding(4.dp))
+        Spacer(modifier = Modifier.padding(2.dp))
 
         Text(
             text = userEmail,
@@ -352,13 +379,8 @@ fun SignOutButton(onSignOut:() -> Unit){
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
             .height(50.dp)
-            .clip(RoundedCornerShape(25.dp))
-            .background(brush = gradientBrush)
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.15f), Color.Black)),
-                shape = RoundedCornerShape(25.dp)
-            )
+            .clip(RoundedCornerShape(10.dp))
+            .background(line)
             .clickable { onSignOut() },
         contentAlignment = Alignment.Center
     ) {
@@ -379,9 +401,9 @@ fun SignOutButton(onSignOut:() -> Unit){
 fun EditProfile(
     userName : String,
     onClose: () -> Unit,
-    addButtonClick: (String, Uri?) -> Unit
-) {
-    var name by remember { mutableStateOf("") }
+    addButtonClick: (String, Uri?) -> Unit,
+    isDarkMode: Boolean
+) {    var name by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
@@ -409,8 +431,8 @@ fun EditProfile(
         Text(
             modifier = Modifier
                 .padding(start = 4.dp),
-            text = "Edit name",
-            color = Grey50,
+            text = stringResource(id = R.string.edit_name),
+            color = if (isDarkMode) Color.Black else Grey50,
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.padding(2.dp))
@@ -430,13 +452,13 @@ fun EditProfile(
             shape = RoundedCornerShape(10.dp),
             textStyle = TextStyle(
                 fontSize = 12.sp,
-                color = Grey50
+                color = if (isDarkMode) Color.Black else Grey50
             ),
             placeholder = {
                 Text(
                     text = userName,
                     fontSize = 12.sp,
-                    color = Grey50,
+                    color = if (isDarkMode) Color.Black else Grey50.copy(alpha = 0.2f),
                 )
             }
         )
@@ -444,26 +466,54 @@ fun EditProfile(
         Text(
             modifier = Modifier
                 .padding(start = 4.dp),
-            text = "Edit photo",
-            color = Grey50,
+            text = stringResource(id = R.string.edit_photo),
+            color = if (isDarkMode) Color.Black else Grey50,
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.padding(2.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(100.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Grey30)
-                .clickable { imagePickerLauncher.launch("image/*") }
-                .padding(12.dp),
-            contentAlignment = Alignment.CenterStart
+                .border(1.dp, Grey50, RoundedCornerShape(10.dp))
+                .background(Grey30.copy(alpha = 0.1f))
+                .clickable { imagePickerLauncher.launch("image/*") },
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = selectedImageUri?.lastPathSegment ?: "Choose Photo",
-                color = if (selectedImageUri != null) Color.White else Grey50,
-                fontSize = 12.sp
-            )
+            if (selectedImageUri != null) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Upload Icon",
+                        tint = Color.Green.copy(alpha = 0.4f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Image selected",
+                        color = Grey50.copy(alpha = 0.6f),
+                        fontSize = 12.sp
+                    )
+                }
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        contentDescription = "Upload Icon",
+                        tint = Grey50.copy(alpha = 0.6f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Click to add photo",
+                        color = Grey50.copy(alpha = 0.6f),
+                        fontSize = 12.sp
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.padding(12.dp))
         val gradientBrush = Brush.verticalGradient(
@@ -472,20 +522,9 @@ fun EditProfile(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
                 .height(50.dp)
-                .clip(RoundedCornerShape(25.dp))
-                .background(brush = gradientBrush)
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        listOf(
-                            Color.White.copy(alpha = 0.15f),
-                            Color.Black
-                        )
-                    ),
-                    shape = RoundedCornerShape(25.dp)
-                )
+                .clip(RoundedCornerShape(10.dp))
+                .background(line)
                 .clickable {
                     addButtonClick(name, selectedImageUri)
                     amount = ""
@@ -496,7 +535,7 @@ fun EditProfile(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Done",
+                    text = stringResource(id = R.string.done),
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,

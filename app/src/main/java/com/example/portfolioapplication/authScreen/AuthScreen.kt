@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +58,7 @@ import com.facebook.login.LoginResult
 @Preview
 @Composable
 fun LoginScreenPreview(){
-    AuthScreen(modifier = Modifier, onButtonClick = {}, googleSignIn = {}, loginWithFacebook = {}, isLoading = true)
+    AuthScreen(modifier = Modifier, onButtonClick = {}, googleSignIn = {}, loginWithFacebook = {}, isLoading = false, isDarkMode = false)
 }
 
 
@@ -67,7 +68,8 @@ fun AuthScreen(
     googleSignIn: () -> Unit,
     onButtonClick: () -> Unit,
     loginWithFacebook : () -> Unit,
-    isLoading : Boolean
+    isLoading : Boolean,
+    isDarkMode : Boolean
 ){
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
@@ -75,7 +77,7 @@ fun AuthScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color = bgColor)
+            .background(color = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor)
     ) {
         AnimatedLoader(isLoading = isLoading)
         Box(
@@ -84,14 +86,26 @@ fun AuthScreen(
                 .padding(top = 56.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                textAlign = TextAlign.Center,
-                text = "MY PORTFOLIO",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontFamily = customFont,
-                fontSize = 24.sp,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_expenses_icon),
+                    contentDescription = "logo",
+                    modifier = Modifier
+                        .size(30.dp),
+                )
+                Spacer(modifier = Modifier.padding(6.dp))
+                Text(
+                    text = stringResource(id = R.string.app_title),
+                    color = if (isDarkMode) bgColor else Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = customFont,
+                    fontSize = 26.sp,
+                )
+            }
         }
         Column(
             modifier = Modifier
@@ -100,8 +114,6 @@ fun AuthScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-            AppleButton()
-            Spacer(modifier = Modifier.padding(12.dp))
             GoogleButton(onButtonClick = googleSignIn)
             Spacer(modifier = Modifier.padding(12.dp))
             FaceBookButton(loginWithFacebook =  loginWithFacebook)

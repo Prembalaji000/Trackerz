@@ -37,7 +37,6 @@ class LoginViewModel(context: Context, private val preference: sharedPreference)
                     val name = email.substringBefore("@")
                     preference.setUserName(name)
                     preference.setUserEmailId(email)
-                    preference.setUserImageUrl("")
                     if (isAddedRememberMe){
                         preference.setEmail(email)
                         preference.setPassword(password)
@@ -48,7 +47,9 @@ class LoginViewModel(context: Context, private val preference: sharedPreference)
                     viewModelScope.launch {
                         delay(4000)
                         _loginState.update { it.copy(isLoading = false) }
-                        navController.navigate(Screens.DashBoardScreen)
+                        navController.navigate(Screens.HomeScreen){
+                            popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+                        }
                     }
                 } else {
                     Toast.makeText(

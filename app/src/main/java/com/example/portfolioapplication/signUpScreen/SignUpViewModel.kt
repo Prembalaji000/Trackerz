@@ -38,7 +38,9 @@ class SignUpViewModel() : ViewModel(){
                         viewModelScope.launch {
                             delay(4000)
                             _loginState.update { it.copy(isLoading = false) }
-                            navController.navigate(Screens.LoginScreen)
+                            navController.navigate(Screens.LoginScreen){
+                                popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+                            }
                         }
                     } else {
                         _loginState.update { it.copy(isLoading = false) }

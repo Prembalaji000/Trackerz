@@ -14,21 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.portfolioapplication.Screens
-import com.example.portfolioapplication.dashBoardScreen.DashBoardRouter
-import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModel
-import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModelFactory
-import com.example.portfolioapplication.dashBoardScreen.MainApplication
-import com.example.portfolioapplication.loginScreen.LoginRouter
-import com.example.portfolioapplication.loginScreen.LoginScreen
-import com.example.portfolioapplication.loginScreen.LoginViewModel
-import com.example.portfolioapplication.loginScreen.LoginViewModelFactory
-import com.example.portfolioapplication.signUpScreen.SignUpRouter
-import com.example.portfolioapplication.signUpScreen.SignUpViewModel
+import androidx.navigation.NavController
+import com.example.portfolioapplication.loginScreen.sharedPreference
 import com.facebook.CallbackManager
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -37,14 +24,13 @@ fun AuthScreenRouter(
     modifier: Modifier,
     context: Context,
     viewModel: AuthViewModel,
-    signUpViewModel: SignUpViewModel,
-    loginViewModel: LoginViewModel,
+    navController: NavController,
     callbackManager: CallbackManager
 ){
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val navController = rememberNavController()
     val authState by viewModel.authState.collectAsStateWithLifecycle()
+    val preference = sharedPreference(context)
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -55,7 +41,9 @@ fun AuthScreenRouter(
                 scope = lifecycleOwner.lifecycleScope,
                 launcher = null,
                 onNavigate = {
-                    navController.navigate(it)
+                    navController.navigate(it){
+                        popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+                    }
                 }
             )
         } else {
@@ -63,59 +51,33 @@ fun AuthScreenRouter(
         }
     }
 
-    NavHost(navController = navController, startDestination = Screens.AuthScreen) {
-        composable<Screens.AuthScreen> {
-            AuthScreen(
-                modifier = modifier,
-                onButtonClick = {
-                    viewModel.navigateToLoginScreen(navController)
-                },
-                googleSignIn = {
-                    viewModel.googleSignIn(
-                        context = context,
-                        scope = scope,
-                        launcher = launcher,
-                        onNavigate = { screen ->
-                            navController.navigate(screen)
-                        }
-                    )
-                },
-                loginWithFacebook = {
-                    viewModel.loginWithFacebook(
-                        onNavigate = {
-                            navController.navigate(it)
-                        },
-                        context = context,
-                        callbackManager = callbackManager,
-                    )
-                },
-                isLoading = authState.isLoading
-            )
-        }
-        composable<Screens.LoginScreen> {
-            val viewModels: LoginViewModel = viewModel(
-                factory = LoginViewModelFactory(context)
-            )
-            LoginRouter(
-                viewModel = viewModels,
-                modifier = modifier,
-                context = context
-            )
-        }
-        composable<Screens.SignUpScreen>{
-            SignUpRouter(
-                modifier = modifier,
-                viewModel = signUpViewModel,
-                loginViewModel = loginViewModel,
+    AuthScreen(
+        modifier = modifier,
+        onButtonClick = {
+            viewModel.navigateToLoginScreen(navController)
+        },
+        googleSignIn = {
+            viewModel.googleSignIn(
                 context = context,
+                scope = scope,
+                launcher = launcher,
+                onNavigate = { screen ->
+                    navController.navigate(screen)
+                }
             )
-        }
-        composable<Screens.DashBoardScreen> {
-            val todoDao = MainApplication.todoDatabase.getTodoDao()
-            val viewModels: DashBoardViewModel = viewModel(
-                factory = DashBoardViewModelFactory(todoDao, context)
+        },
+        loginWithFacebook = {
+            viewModel.loginWithFacebook(
+                onNavigate = {
+                    navController.navigate(it){
+                        popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+                    }
+                },
+                context = context,
+                callbackManager = callbackManager,
             )
-            DashBoardRouter(viewModel = viewModels, modifier = modifier, loginViewModel = loginViewModel)
-        }
-    }
+        },
+        isLoading = authState.isLoading,
+        isDarkMode = preference.isDarkModeEnabled()
+    )
 }

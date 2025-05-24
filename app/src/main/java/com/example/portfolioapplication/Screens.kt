@@ -21,4 +21,13 @@ sealed interface Screens {
     @Serializable
     data object SettingScreen : Screens
 
+    @Serializable
+    data object HomeScreen : Screens
+
+    @Serializable
+    data object AddExpenseScreen : Screens
+
+    @Serializable
+    data object TransactionsScreen : Screens
+
 }

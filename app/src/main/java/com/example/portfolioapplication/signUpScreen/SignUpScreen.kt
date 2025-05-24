@@ -2,6 +2,12 @@ package com.example.portfolioapplication.signUpScreen
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -46,6 +52,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -69,13 +77,14 @@ import com.example.portfolioapplication.ui.theme.DarkBlue96
 import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.darkBlue
+import com.example.portfolioapplication.ui.theme.line
 import com.example.portfolioapplication.ui.theme.redAccent100
 
 
 @Preview
 @Composable
 fun SignUpScreePreview(){
-    SignUpScreen(modifier = Modifier, onButtonClick = {_, _ ->}, isLoading = true)
+    SignUpScreen(modifier = Modifier, onButtonClick = {_, _ ->}, onClickSocials = {}, isLoading = true, isDarkMode = false)
 }
 
 
@@ -83,7 +92,9 @@ fun SignUpScreePreview(){
 fun SignUpScreen(
     modifier: Modifier,
     onButtonClick: (String, String) -> Unit,
-    isLoading: Boolean
+    onClickSocials: () -> Unit,
+    isLoading: Boolean,
+    isDarkMode : Boolean
     ){
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
@@ -96,20 +107,33 @@ fun SignUpScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color = bgColor)
+            .background(color =  if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AnimatedLoader(isLoading = isLoading)
         Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "MY PORTFOLIO",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontFamily = customFont,
-            fontSize = 24.sp,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_expenses_icon),
+                contentDescription = "logo",
+                modifier = Modifier
+                    .size(30.dp),
+            )
+            Spacer(modifier = Modifier.padding(6.dp))
+            Text(
+                text = stringResource(id = R.string.app_title),
+                color = if (isDarkMode) bgColor else Color.White,
+                fontWeight = FontWeight.Bold,
+                fontFamily = customFont,
+                fontSize = 26.sp,
+            )
+        }
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -133,7 +157,11 @@ fun SignUpScreen(
                 color = Grey50
             )
             Spacer(modifier = Modifier.height(16.dp))
-            StartButton("Get started, it's free!")
+            SignInButton(
+                text = "Sign In",
+                onButtonClick = { onButtonClick(email, password) },
+                isDarkMode = isDarkMode
+            )
         }
         Column(
             modifier = Modifier
@@ -145,12 +173,13 @@ fun SignUpScreen(
                 text = "Do you already have an account?",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.White
+                color = if (isDarkMode) bgColor else Color.White
             )
             Spacer(modifier = Modifier.height(16.dp))
-            SignInButton(
-                text = "Sign In",
-                onButtonClick = { onButtonClick(email, password) }
+            StartButton(
+                text = "Sign in with socials",
+                isDarkMode = isDarkMode,
+                onClickSocials = onClickSocials
             )
         }
     }
@@ -172,7 +201,7 @@ fun TextField(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     isEmailValid : Boolean,
-    isPasswordValid : Boolean
+    isPasswordValid : Boolean,
 ){
     val emailInteractionSource = remember { MutableInteractionSource() }
     val passwordInteractionSource = remember { MutableInteractionSource() }
@@ -389,23 +418,23 @@ fun TextField(
 
 
 @Composable
-fun StartButton(text : String){
+fun StartButton(text : String, isDarkMode: Boolean, onClickSocials: () -> Unit){
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
     )
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
+            .padding(horizontal = 2.dp)
             .height(50.dp)
             .clip(RoundedCornerShape(25.dp))
-            .background(brush = gradientBrush)
+            .background(Color.DarkGray)
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.15f), Color.Black)),
                 shape = RoundedCornerShape(25.dp)
             )
-            .clickable { /* Handle click */ },
+            .clickable { onClickSocials.invoke() },
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -414,7 +443,7 @@ fun StartButton(text : String){
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.White
+                color = if (isDarkMode) bgColor else Color.White
             )
         }
     }
@@ -423,15 +452,16 @@ fun StartButton(text : String){
 @Composable
 fun SignInButton(
     text: String,
-    onButtonClick: () -> Unit
+    onButtonClick: () -> Unit,
+    isDarkMode: Boolean
     ){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
+            .padding(horizontal = 2.dp)
             .height(50.dp)
             .clip(RoundedCornerShape(25.dp))
-            .background(Color.DarkGray)
+            .background(line)
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.15f), Color.Black)),
@@ -539,6 +569,15 @@ fun AnimatedLoader(
         iterations = LottieConstants.IterateForever,
         isPlaying = true
     )
+    val infiniteTransition = rememberInfiniteTransition()
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(500),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
 
     AnimatedVisibility(visible = isLoading) {
         Dialog(onDismissRequest = {  }) {
@@ -549,7 +588,7 @@ fun AnimatedLoader(
                 LottieAnimation(
                     composition = preLoaderLottieAnimation,
                     progress = preLoaderProgress,
-                    modifier = modifier.size(100.dp),
+                    modifier = modifier.size(66.dp),
                     contentScale = ContentScale.Fit,
                 )
                 Spacer(modifier = Modifier.padding(4.dp))
@@ -557,7 +596,7 @@ fun AnimatedLoader(
                     text = "Loading..",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.White
+                    color = Color.White.copy(alpha = alpha)
                 )
             }
         }

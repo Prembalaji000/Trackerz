@@ -17,5 +17,10 @@ val darkBlue = Color(0xFF085783)
 val redAccent100 = Color(0xFFEF4444)
 val DarkBlue96 = Color(0xFFECF8FD)
 val DarkBlue40 = Color(0xFF009bbd)
+val Zinc = Color(0xFF2F7E79)
+val Red = Color(0xFFFF0000)
+val green = Color(0xFF24e636)
+val line = Color(0xFF348781)
+
 
 val appLightBackGround = Brush.horizontalGradient(colors = listOf(DarkBlue40,darkBlue))
