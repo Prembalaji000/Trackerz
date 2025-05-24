@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +20,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -53,46 +56,55 @@ fun SplashScreen(
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )
+    val isDarkMode = preference.isDarkModeEnabled()
     LaunchedEffect(Unit) {
         delay(6000)
         if (preference.getCheckRememberMe()){
-            navController.navigate(Screens.DashBoardScreen){
+            navController.navigate(Screens.HomeScreen){
                 popUpTo(Screens.SplashScreen) { inclusive = true  }
             }
-        }
-        navController.navigate(Screens.AuthScreen) {
-            popUpTo(Screens.SplashScreen) { inclusive = true }
+        } else {
+            navController.navigate(Screens.AuthScreen) {
+                popUpTo(Screens.SplashScreen) { inclusive = true }
+            }
         }
     }
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(bgColor),
+            .background(if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.img),
-            contentDescription = "logo",
-            modifier = Modifier
-                .size(110.dp),
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_expenses_icon),
+                contentDescription = "logo",
+                modifier = Modifier
+                    .size(32.dp),
             )
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(
-            textAlign = TextAlign.Center,
-            text = "MY PORTFOLIO",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontFamily = customFont,
-            fontSize = 24.sp,
-        )
-        Spacer(modifier = Modifier.padding(22.dp))
+            Spacer(modifier = Modifier.padding(6.dp))
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.app_title),
+                color = if (isDarkMode) bgColor else Color.White,
+                fontWeight = FontWeight.Bold,
+                fontFamily = customFont,
+                fontSize = 28.sp,
+            )
+        }
+     /*   Spacer(modifier = Modifier.padding(4.dp))
         LinearProgressIndicator(
             modifier = Modifier
                 .height(2.dp)
                 .padding(horizontal = 12.dp),
-            color = Color.White,
+            color = if (isDarkMode) bgColor else Color.White,
             trackColor = Color.Transparent,
-        )
+        )*/
     }
 }
