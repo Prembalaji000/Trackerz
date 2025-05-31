@@ -21,7 +21,7 @@ object Utils {
         return dateFormatter.format(dateInMillis)
     }
 
-    fun formatCurrency(amount: Double, locale: Locale = Locale.US): String {
+    fun formatCurrency(amount: Double, locale: Locale = Locale.getDefault()): String {
         val currencyFormatter = NumberFormat.getCurrencyInstance(locale)
         return currencyFormatter.format(amount)
     }

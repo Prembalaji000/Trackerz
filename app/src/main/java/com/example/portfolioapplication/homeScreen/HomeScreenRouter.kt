@@ -76,6 +76,8 @@ fun HomeScreenRouter(
             scope.launch {
                 expenseViewModel.addExpense(expenseEntity = it)
             }
-        }
+        },
+        toShowCase = viewModel.showCase,
+        onShowCaseCompleted = { viewModel.onShowCaseCompleted(it) }
     )
 }

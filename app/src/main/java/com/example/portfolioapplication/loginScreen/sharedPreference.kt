@@ -16,6 +16,7 @@ class sharedPreference(context: Context){
         private const val KEY_USER_EMAIL = "userEmail"
         private const val KEY_USER_IMAGE_URL = "userImageUrl"
         private const val KEY_DARK_MODE = "dark_mode"
+        private const val KEY_SHOW_SHOWCASE = "show_case"
     }
 
     fun clearCredentials() {
@@ -105,10 +106,19 @@ class sharedPreference(context: Context){
         sharedPref.edit {
             putBoolean(KEY_DARK_MODE, isEnabled)
         }
-        println("setDarkModeEnabled : $isEnabled")
     }
 
     fun isDarkModeEnabled(): Boolean {
         return sharedPref.getBoolean(KEY_DARK_MODE, false)
+    }
+
+    fun setShowShowCase(toShow: Boolean){
+        sharedPref.edit {
+            putBoolean(KEY_SHOW_SHOWCASE, toShow)
+        }
+    }
+
+    fun getShowCase(): Boolean{
+        return sharedPref.getBoolean(KEY_SHOW_SHOWCASE, true)
     }
 }

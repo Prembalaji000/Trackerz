@@ -2,24 +2,33 @@ package com.example.portfolioapplication.homeScreen
 
 import android.annotation.SuppressLint
 import android.provider.ContactsContract.Data
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -28,20 +37,31 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,23 +76,32 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -82,13 +111,16 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -107,10 +139,15 @@ import com.example.portfolioapplication.homeScreen.add_expense.DataForm
 import com.example.portfolioapplication.homeScreen.add_expense.ExpenseDatePickerDialog
 import com.example.portfolioapplication.homeScreen.add_expense.ExpenseDropDown
 import com.example.portfolioapplication.homeScreen.add_expense.TitleComponent
+import com.example.portfolioapplication.showCase.IntroShowcase
+import com.example.portfolioapplication.showCase.IntroShowcaseScope
+import com.example.portfolioapplication.showCase.theme.component.ShowcaseStyle
+import com.example.portfolioapplication.showCase.theme.component.rememberIntroShowcaseState
 import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.line
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Preview
 @Composable
@@ -128,7 +165,9 @@ fun HomeScreenPreview(){
         expenseList = listOf(),
         onDeleteTransaction = {},
         onAddExpenseClick = {},
-        settingButton = {}
+        settingButton = {},
+        toShowCase = false,
+        onShowCaseCompleted = {}
     )
 }
 
@@ -150,149 +189,213 @@ fun HomeScreen(
     onDeleteTransaction: (ExpenseEntity) -> Unit,
     onAddExpenseClick: (model: ExpenseEntity) -> Unit,
     settingButton: () -> Unit,
+    toShowCase: Boolean,
+    onShowCaseCompleted: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val imageLoader = ImageLoader(context)
     var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var isFromIncome by mutableStateOf(false)
+    val sheetState = androidx.compose.material.rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true,
+        confirmValueChange = { false }
+    )
+    var showAppIntro by remember {
+        mutableStateOf(true)
+    }
 
-    Surface(
-        modifier = modifier
-            .fillMaxSize()
+    val introShowcaseState = rememberIntroShowcaseState()
+    LaunchedEffect(sheetState) {
+        scope.launch {
+            if (sheetState.isVisible){
+                sheetState.hide()
+            }
+        }
+    }
+
+    IntroShowcase(
+        showIntroShowCase = showAppIntro,
+        dismissOnClickOutside = false,
+        onShowCaseCompleted = {
+            onShowCaseCompleted(false)
+            showAppIntro = false
+        },
+        state = introShowcaseState,
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize().background(bgColor)) {
-            val (nameRow, list, card, topBar, add) = createRefs()
-            Image(
-                painter = painterResource(id = R.drawable.ic_topbar), contentDescription = null,
-                modifier = Modifier.constrainAs(topBar) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-            )
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 38.dp, start = 16.dp, end = 16.dp)
-                .constrainAs(nameRow) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(userImageUrl)
-                            .crossfade(true)
-                            .build(),
-                        imageLoader = imageLoader,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray),
-                        placeholder = painterResource(id = R.drawable.ic_user),
-                        error = painterResource(id = R.drawable.ic_user)
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column {
-                        ExpenseTextView(
-                            text = "Good Afternoon",
-                            color = White,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        ExpenseTextView(
-                            text = userName,
-                            color = White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                Image(
-                    painter = painterResource(id = R.drawable.ic_profile_icon),
-                    contentScale = ContentScale.Fit,
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(color = White),
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .size(26.dp)
-                        .clickable {
-                            settingButton.invoke()
-                        }
-                )
-            }
-            CardItem(
-                modifier = Modifier.constrainAs(card) {
-                    top.linkTo(nameRow.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
-                balance = balance, income = income, expense = expense
-            )
-            TransactionList(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(list) {
-                        top.linkTo(card.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom)
-                        height = Dimension.fillToConstraints
-                    },
-                list = expenseList,
-                onSeeAllClicked = onSeeAllClicked,
-                onDeleteTransaction = onDeleteTransaction
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .constrainAs(add) {
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                    }
-                , contentAlignment = Alignment.BottomEnd
-            ) {
-                MultiFloatingActionButton(
-                    modifier = Modifier,
-                    onAddExpenseClicked = {
+        ModalBottomSheetLayout(
+            sheetState = sheetState,
+            sheetShape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp),
+            sheetContent = {
+                BottomSheet(
+                    onAddExpenseClick = {
+                        onAddExpenseClick.invoke(it)
                         scope.launch {
-                            isFromIncome = false
-                            showBottomSheet = true
-                        }
-                    },
-                    onAddIncomeClicked = {
-                        scope.launch {
-                            isFromIncome = true
-                            showBottomSheet = true
-                        }
-                    }
-                )
-            }
-            if (showBottomSheet){
-                ModalBottomSheet(
-                    containerColor = bgColor,
-                    onDismissRequest = { showBottomSheet = false },
-                    sheetState = sheetState,
-                ){
-                    BottomSheet(
-                        modifier = modifier,
-                        onAddExpenseClick = {
-                            onAddExpenseClick.invoke(it)
                             showBottomSheet = false
-                        },
-                        isIncome = isFromIncome
+                            sheetState.hide()
+                        }
+                    },
+                    onCancelCLick = {
+                        scope.launch {
+                            sheetState.hide()
+                        } },
+                    isIncome = isFromIncome
+                )
+            }
+        ){
+            Surface(
+                modifier = modifier.fillMaxSize()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(bgColor)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_topbar),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter)
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 34.dp, start = 16.dp, end = 16.dp)
+                            .align(Alignment.TopCenter)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(context)
+                                    .data(userImageUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                imageLoader = imageLoader,
+                                contentDescription = "Profile Image",
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Gray),
+                                placeholder = painterResource(id = R.drawable.ic_user),
+                                error = painterResource(id = R.drawable.ic_user)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                ExpenseTextView(
+                                    text = "Good Afternoon",
+                                    color = White,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                ExpenseTextView(
+                                    text = userName,
+                                    color = White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = {},
+                            modifier = Modifier.introShowCaseTarget(
+                                index = 0,
+                                style = ShowcaseStyle.Default.copy(
+                                    backgroundColor = Color(0xFF9AD0EC), // specify color of background
+                                    backgroundAlpha = 0.98f, // specify transparency of background
+                                    targetCircleColor = Color.White // specify color of target circle
+                                ),
+                                content = {
+                                    Column {
+                                        Image(
+                                            painterResource(id = R.drawable.search_example),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(100.dp)
+                                        )
+
+                                        androidx.compose.material.Text(
+                                            text = "Profile View!!",
+                                            color = Color.Black,
+                                            fontSize = 24.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        androidx.compose.material.Text(
+                                            text = "You can view and edit your profile",
+                                            color = Color.Black,
+                                            fontSize = 16.sp
+                                        )
+                                    }
+                                }
+                           ).align(Alignment.CenterEnd)
+                        ){
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_profile_icon),
+                                contentScale = ContentScale.Fit,
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(color = White),
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .size(26.dp)
+                                    .clickable { settingButton.invoke() }
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .padding(top = 100.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CardItem(
+                            modifier = Modifier,
+                            balance = balance,
+                            income = income,
+                            expense = expense
+                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            TransactionList(
+                                modifier = Modifier.fillMaxWidth(),
+                                list = expenseList,
+                                onSeeAllClicked = onSeeAllClicked,
+                                onDeleteTransaction = onDeleteTransaction
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .align(Alignment.BottomEnd),
+                        contentAlignment = Alignment.BottomEnd
+                    ) {
+                        MultiFloatingActionButton(
+                            modifier = modifier,
+                            onAddExpenseClicked = {
+                                scope.launch {
+                                    isFromIncome = false
+                                    sheetState.show()
+                                    showBottomSheet = true
+                                }
+                            },
+                            onAddIncomeClicked = {
+                                scope.launch {
+                                    isFromIncome = true
+                                    sheetState.show()
+                                    showBottomSheet = true
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -301,7 +404,7 @@ fun HomeScreen(
 
 
 @Composable
-fun MultiFloatingActionButton(
+fun IntroShowcaseScope.MultiFloatingActionButton(
     modifier: Modifier,
     onAddExpenseClicked: () -> Unit,
     onAddIncomeClicked: () -> Unit
@@ -356,6 +459,35 @@ fun MultiFloatingActionButton(
                     .size(60.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(color = Zinc)
+                    .introShowCaseTarget(
+                        index = 1,
+                        style = ShowcaseStyle.Default.copy(
+                            backgroundColor = Color(0xFF1C0A00),
+                            backgroundAlpha = 0.98f,
+                            targetCircleColor = Color.White
+                        ),
+                        content = {
+                            Column {
+                                Image(
+                                    painterResource(id = R.drawable.ic_expenses),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(82.dp)
+                                )
+
+                                androidx.compose.material.Text(
+                                    text = "To add item",
+                                    color = Color.White,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                androidx.compose.material.Text(
+                                    text = "You can add income and expenses",
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+                    )
                     .clickable {
                         expanded = !expanded
                     },
@@ -444,11 +576,12 @@ fun TransactionList(
     onSeeAllClicked: () -> Unit,
     onDeleteTransaction: (ExpenseEntity) -> Unit
 ) {
+    val context = LocalContext.current
+
     if (list.isEmpty()){
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 142.dp),
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -459,101 +592,152 @@ fun TransactionList(
             )
         }
     } else {
-        LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
-            item {
-                Column {
-                    Box(modifier = modifier.fillMaxWidth()) {
-                        ExpenseTextView(
-                            text = title,
-                            color = White
-                        )
-                        if (title == "Recent Transactions") {
-                            ExpenseTextView(
-                                text = "See all",
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .clickable {
-                                        onSeeAllClicked.invoke()
-                                    },
-                                color = White
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.size(12.dp))
-                }
-            }
-            items(items = list,
-                key = { item -> item.id ?: 0 }) { item ->
-                SwipeableTransactionItem(
-                    expense = item,
-                    onDelete = { onDeleteTransaction(item) }
+        Column {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                ExpenseTextView(
+                    text = title,
+                    color = White
                 )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class)
-@Composable
-fun SwipeableTransactionItem(
-    expense: ExpenseEntity,
-    onDelete: () -> Unit
-) {
-    val dismissState = rememberDismissState(
-        confirmStateChange = { dismissValue ->
-            if (dismissValue == DismissValue.DismissedToStart) {
-                onDelete()
-                true
-            } else {
-                false
-            }
-        }
-    )
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = 0.dp,
-        modifier = Modifier
-            .padding(vertical = 4.dp)
-            .fillMaxWidth()
-    ) {
-        SwipeToDismiss(
-            state = dismissState,
-            background = {
-                val color = MaterialTheme.colors.error
-                val scale by animateFloatAsState(
-                    if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
-                )
-                val dismissProgress = if (dismissState.progress.fraction > 0.05f)
-                    dismissState.progress.fraction else 0f
-                val alpha by animateFloatAsState(targetValue = dismissProgress * 0.9f)
-
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(color.copy(alpha = alpha))
-                        .padding(horizontal = 20.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Transaction",
-                        modifier = Modifier.scale(scale),
-                        tint = Color.White
+                if (title == "Recent Transactions") {
+                    ExpenseTextView(
+                        text = "See all",
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .clickable {
+                                onSeeAllClicked.invoke()
+                            },
+                        color = White
                     )
                 }
-            },
-            directions = setOf(DismissDirection.EndToStart),
-            dismissThresholds = { direction ->
-                FractionalThreshold(if (direction == DismissDirection.EndToStart) 0.9f else 0.5f)
-            },
-            dismissContent = {
-                TransactionItemContent(expense = expense, removeOuterBorder = true)
             }
-        )
+            Spacer(modifier = Modifier.size(12.dp))
+        }
+        LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
+            items(items = list,
+                key = { item -> item.id ?: 0 }) { item ->
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = 0.dp,
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .fillMaxWidth()
+                ){
+                    TransactionItemContent(
+                        expense = item,
+                        isRevealed = false,
+                        onExpanded = {},
+                        onCollapsed = {},
+                        onDeleteClick = {
+                            Toast.makeText(context, "Transaction Deleted Successfully", Toast.LENGTH_SHORT).show()
+                            onDeleteTransaction(item) },
+                        onEditClick = {},
+                        modifier = modifier,
+                        title = item.title,
+                        date = Utils.formatStringDateToMonthDayYear(item.date),
+                        color = if (item.type == "Income") line else Color.Black
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
     }
-
-    Spacer(modifier = Modifier.height(4.dp))
 }
+
+@Composable
+fun TransactionItemContent(
+    expense: ExpenseEntity,
+    isRevealed: Boolean,
+    onExpanded: () -> Unit,
+    onCollapsed: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit,
+    modifier: Modifier,
+    title: String,
+    date: String,
+    color: Color
+) {
+    val icon = Utils.getItemIcon(expense)
+    val amount = if (expense.type == "Income") expense.amount else expense.amount * -1
+
+    SwipeableItemWithActions(
+        isRevealed = isRevealed,
+        onExpanded = onExpanded,
+        onCollapsed = onCollapsed,
+        actions = {
+            /*ActionIcon(
+                onClick = onEditClick,
+                backgroundColor = Color(0xFF4CAF50),
+                icon = Icons.Default.Edit,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(64.dp)
+            )*/
+            ActionIcon(
+                onClick = onDeleteClick,
+                backgroundColor = Color(0xFFF44336),
+                icon = Icons.Default.Delete,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(64.dp)
+            )
+        },
+        modifier = modifier
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            elevation = 0.dp,
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = icon),
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(bgColor)
+                            .padding(4.dp)
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Column {
+                        ExpenseTextView(
+                            text = title,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        ExpenseTextView(
+                            text = date,
+                            fontSize = 13.sp,
+                            color = Grey30
+                        )
+                    }
+                }
+                ExpenseTextView(
+                    text = Utils.formatCurrency(amount),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = color
+                )
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun TransactionItemContent(expense: ExpenseEntity, removeOuterBorder: Boolean = false) {
@@ -582,7 +766,6 @@ fun TransactionItem(
     modifier: Modifier,
     removeOuterBorder: Boolean = false
 ) {
-    println("TransactionItem : $removeOuterBorder")
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -697,23 +880,23 @@ fun ExpenseTextView(
 @Composable
 fun Preview(){
     BottomSheet(
-        modifier = Modifier,
         onAddExpenseClick = {},
+        onCancelCLick = {},
         isIncome = true
     )
 }
 
 @Composable
 fun BottomSheet(
-    modifier: Modifier = Modifier,
     onAddExpenseClick: (model: ExpenseEntity) -> Unit,
+    onCancelCLick: () -> Unit = {},
     isIncome: Boolean
 ) {
     val name = remember { mutableStateOf("") }
-    val amount = remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("") }
     val date = remember { mutableLongStateOf(0L) }
     val dateDialogVisibility = remember { mutableStateOf(false) }
-    val type = remember { mutableStateOf(if (isIncome) "Income" else "Expense") }
+    val type = rememberUpdatedState(if (isIncome) "Income" else "Expense")
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
     )
@@ -721,14 +904,20 @@ fun BottomSheet(
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var isFocused by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+    val TitleInteraction = remember { MutableInteractionSource() }
+    val context = LocalContext.current
+
 
     Column(
-        modifier = modifier
-            .wrapContentHeight()
+        modifier = Modifier
+            .navigationBarsPadding()
             .fillMaxWidth()
             .background(bgColor)
             .padding(16.dp)
-            .verticalScroll(scrollState)
+            .imePadding()
     ) {
         Box(
             modifier = Modifier
@@ -742,8 +931,13 @@ fun BottomSheet(
                 fontSize = 18.sp
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        TitleComponent(title = "Name")
+        Spacer(modifier = Modifier.height(18.dp))
+        Text(
+            modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
+            text = "Choose a category",
+            color = White,
+            fontSize = 14.sp
+        )
         ExpenseDropDown(
             listOfItems = if (isIncome) listOf(
                 "Paypal", "Salary", "Freelance", "Investments", "Bonus",
@@ -757,12 +951,12 @@ fun BottomSheet(
             onItemSelected = { name.value = it }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        TitleComponent("Amount")
+        /*TitleComponent("Amount")
         OutlinedTextField(
-            value = amount.value,
-            onValueChange = { amount.value = it.filter { ch -> ch.isDigit() || ch == '.' } },
+            value = amount,
+            onValueChange = { amount = it.filter { ch -> ch.isDigit() || ch == '.' } },
             visualTransformation = {
                 TransformedText(
                     AnnotatedString("$${it.text}"),
@@ -809,34 +1003,170 @@ fun BottomSheet(
                 unfocusedTextColor = Color.White,
             ),
             placeholder = { ExpenseTextView(text = "Select date", color = White) }
+        )*/
+        Text(
+            modifier = Modifier.padding(start = 6.dp, top = 8.dp),
+            text = "Enter amount",
+            color = White,
+            fontSize = 14.sp
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Box(
+        androidx.compose.material.OutlinedTextField(
+            value = amount,
+            onValueChange = { amount = it.filter { ch -> ch.isDigit() || ch == '.' } },
+            visualTransformation = {
+                TransformedText(
+                    AnnotatedString("$${it.text}"),
+                    object : OffsetMapping {
+                        override fun originalToTransformed(offset: Int) = offset + 1
+                        override fun transformedToOriginal(offset: Int) = if (offset > 0) offset - 1 else 0
+                    }
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(line)
-                .clickable {
+                .onFocusEvent {
+                    isFocused = it.isFocused
+                }
+                .padding(top = 10.dp)
+                .border(BorderStroke(0.5.dp, Color(0xFFD1D1D1)), RoundedCornerShape(25.dp)),
+            singleLine = true,
+            interactionSource = TitleInteraction,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardActions = KeyboardActions(onDone = {
+                keyboardController?.hide()
+            }),
+            placeholder = {
+                androidx.compose.material.Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = "Enter amount",
+                    fontSize = 14.sp,
+                )
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                backgroundColor = Color.White,
+                focusedBorderColor = Color(0xFFD1D1D1),
+                unfocusedBorderColor = Color(0xFFD1D1D1),
+                cursorColor = Color.Black
+            ),
+            shape = RoundedCornerShape(25.dp),
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            modifier = Modifier.padding(start = 6.dp, top = 8.dp),
+            text = "Select data",
+            color = White,
+            fontSize = 14.sp
+        )
+        androidx.compose.material.OutlinedTextField(
+            value = if (date.longValue == 0L) "" else Utils.formatDateToHumanReadableForm(date.longValue),
+            onValueChange = { },
+            visualTransformation = VisualTransformation.None,
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusEvent {
+                    isFocused = it.isFocused
+                }
+                .padding(top = 10.dp)
+                .border(BorderStroke(0.5.dp, Color(0xFFD1D1D1)), RoundedCornerShape(25.dp))
+                .clickable { dateDialogVisibility.value = true },
+            enabled = false,
+            textStyle = TextStyle(color = Color(0xFF757575)),
+            singleLine = true,
+            interactionSource = TitleInteraction,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(onDone = {
+                keyboardController?.hide()
+            }),
+            placeholder = {
+                androidx.compose.material.Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = "DD/MM/YYYY",
+                    fontSize = 14.sp,
+                )
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                backgroundColor = Color.White,
+                focusedBorderColor = Color(0xFFD1D1D1),
+                unfocusedBorderColor = Color(0xFFD1D1D1),
+                cursorColor = Color.Black
+            ),
+            shape = RoundedCornerShape(25.dp),
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+        Divider(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp), color = White)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            OutlinedButton(
+                onClick = {
+                    keyboardController?.hide()
+                    onCancelCLick.invoke()
+                    amount = ""
+                    name.value = ""
+                    date.longValue = 0
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp)
+                    .padding(horizontal = 8.dp),
+                shape = RoundedCornerShape(25.dp),
+                border = BorderStroke(1.dp, Color(0xFFD1D1D1)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = bgColor)
+            ) {
+                androidx.compose.material.Text(
+                    text = "Cancel",
+                    fontSize = 13.sp,
+                    color = Color(0xFF757575)
+                )
+            }
+            androidx.compose.material.Button(
+                onClick = {
+                    keyboardController?.hide()
                     val model = ExpenseEntity(
                         null,
                         name.value,
-                        amount.value.toDoubleOrNull() ?: 0.0,
+                        amount.toDoubleOrNull() ?: 0.0,
                         Utils.formatDateToHumanReadableForm(date.longValue),
-                        type.value
+                        type.value,
                     )
-                    onAddExpenseClick(model)
+                    when{
+                        model.title.isEmpty() -> {
+                            Toast.makeText(context, "Please enter a title", Toast.LENGTH_SHORT).show()
+                        }
+                        model.amount == 0.0 -> {
+                            Toast.makeText(context, "Please enter an amount", Toast.LENGTH_SHORT).show()
+                        }
+                        model.date == "01/01/1970" -> {
+                            Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {
+                            println("model: ${model.date}")
+                            onAddExpenseClick(model)
+                            Toast.makeText(context, "Expense added successfully", Toast.LENGTH_SHORT).show()
+                            amount = ""
+                            name.value = ""
+                            date.longValue = 0
+                        }
+                    }
                 },
-            contentAlignment = Alignment.Center
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp)
+                    .padding(horizontal = 8.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = line),
+                shape = RoundedCornerShape(25.dp)
+            ) {
+                androidx.compose.material.Text(
                     text = "Add ${if (isIncome) "Income" else "Expense"}",
-                    textAlign = TextAlign.Center,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
                     color = Color.White
                 )
             }
@@ -853,5 +1183,107 @@ fun BottomSheet(
                 dateDialogVisibility.value = false
             }
         )
+    }
+}
+
+
+
+
+@Composable
+fun ActionIcon(
+    onClick: () -> Unit,
+    backgroundColor: Color,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    tint: Color = Color.White
+) {
+    androidx.compose.material3.IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .background(backgroundColor)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = tint
+        )
+    }
+}
+
+@Composable
+fun SwipeableItemWithActions(
+    isRevealed: Boolean,
+    actions: @Composable RowScope.() -> Unit,
+    modifier: Modifier = Modifier,
+    onExpanded: () -> Unit = {},
+    onCollapsed: () -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    var contextMenuWidth by remember {
+        mutableFloatStateOf(0f)
+    }
+    val offset = remember {
+        Animatable(initialValue = 0f)
+    }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = isRevealed, contextMenuWidth) {
+        if(isRevealed) {
+            offset.animateTo(contextMenuWidth)
+        } else {
+            offset.animateTo(0f)
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+    ) {
+        Row(
+            modifier = Modifier
+                .onSizeChanged {
+                    contextMenuWidth = it.width.toFloat()
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            actions()
+        }
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset { IntOffset(offset.value.roundToInt(), 0) }
+                .pointerInput(contextMenuWidth) {
+                    detectHorizontalDragGestures(
+                        onHorizontalDrag = { _, dragAmount ->
+                            scope.launch {
+                                val newOffset = (offset.value + dragAmount)
+                                    .coerceIn(0f, contextMenuWidth)
+                                offset.snapTo(newOffset)
+                            }
+                        },
+                        onDragEnd = {
+                            when {
+                                offset.value >= contextMenuWidth / 2f -> {
+                                    scope.launch {
+                                        offset.animateTo(contextMenuWidth)
+                                        onExpanded()
+                                    }
+                                }
+
+                                else -> {
+                                    scope.launch {
+                                        offset.animateTo(0f)
+                                        onCollapsed()
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+        ) {
+            content()
+        }
     }
 }

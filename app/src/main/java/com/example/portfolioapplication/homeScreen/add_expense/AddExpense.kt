@@ -19,6 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -49,9 +52,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -360,7 +365,46 @@ fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) ->
         mutableStateOf(listOfItems[0])
     }
     ExposedDropdownMenuBox(expanded = expanded.value, onExpandedChange = { expanded.value = it }) {
-        OutlinedTextField(
+        androidx.compose.material.OutlinedTextField(
+            value = selectedItem.value,
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            visualTransformation = VisualTransformation.None,
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor()
+                .border(
+                    BorderStroke(0.5.dp, Color(0xFFD1D1D1)),
+                    RoundedCornerShape(25.dp)
+                ),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                backgroundColor = Color.White,
+                focusedBorderColor = Color(0xFFD1D1D1),
+                unfocusedBorderColor = Color(0xFFD1D1D1)
+            ),
+            textStyle = TextStyle(
+                fontSize = 14.sp,
+                color = Color(0xFF757575)
+            ),
+            shape = RoundedCornerShape(24.dp),
+            placeholder = {
+                androidx.compose.material.Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = "Choose the name",
+                    fontSize = 14.sp,
+                )
+            },
+            trailingIcon = {
+                //ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
+                androidx.compose.material.Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Dropdown Arrow",
+                )
+            }
+        )
+        /*OutlinedTextField(
             value = selectedItem.value,
             onValueChange = {},
             modifier = Modifier
@@ -386,10 +430,12 @@ fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) ->
                 unfocusedTextColor = Color.White,
 
             )
-        )
+        )*/
         ExposedDropdownMenu(expanded = expanded.value, onDismissRequest = { }) {
             listOfItems.forEach {
-                DropdownMenuItem(text = { ExpenseTextView(text = it) }, onClick = {
+                DropdownMenuItem(
+                    text = { ExpenseTextView(text = it) },
+                    onClick = {
                     selectedItem.value = it
                     onItemSelected(selectedItem.value)
                     expanded.value = false

@@ -35,7 +35,7 @@ fun SettingRouter(
             }
         },
         onSignOut = {
-            preference.clearUserCredentials()
+            //preference.clearUserCredentials()
             navController.navigate(Screens.LoginScreen){
                 popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
             }
@@ -44,11 +44,12 @@ fun SettingRouter(
         userEmail = userEmail,
         userImageUrl = userImageUrl,
         addButtonClick = { name, uri ->
+            println("addButtonClick 3 $name $uri")
             if (name.isNotEmpty()){
                 preference.setUserName(name)
             }
             if (uri != null){
-                preference.setUserImageUrl(uri.toString())
+                preference.setUserImageUrl(uri)
             }
             if (name.isNotEmpty() || uri != null){
                 viewModel.refreshProfile(context)

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.example.portfolioapplication.db.TodoDatabase
 import com.example.portfolioapplication.di.ExpenseDatabase
+import com.example.portfolioapplication.di.MIGRATION_1_2
 import com.facebook.CallbackManager
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
@@ -30,6 +31,8 @@ class MainApplication : Application(){
             applicationContext,
             ExpenseDatabase::class.java,
             ExpenseDatabase.DATABASE_NAME
-        ).build()
+        ).fallbackToDestructiveMigration()
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 }

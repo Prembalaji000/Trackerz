@@ -1,8 +1,6 @@
 package com.example.portfolioapplication.di
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -22,8 +20,8 @@ abstract class ExpenseDatabase : RoomDatabase() {
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL(
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
             """
             CREATE TABLE IF NOT EXISTS expense_table_new (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +34,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         )
 
         // Step 2: Copy the data from the old table to the new table
-        database.execSQL(
+        db.execSQL(
             """
             INSERT INTO expense_table_new (id, title, amount, date, type)
             SELECT id, title, amount, date, type FROM expense_table
@@ -44,9 +42,9 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         )
 
         // Step 3: Drop the old table
-        database.execSQL("DROP TABLE expense_table")
+        db.execSQL("DROP TABLE expense_table")
 
         // Step 4: Rename the new table to the original table name
-        database.execSQL("ALTER TABLE expense_table_new RENAME TO expense_table")
+        db.execSQL("ALTER TABLE expense_table_new RENAME TO expense_table")
     }
 }

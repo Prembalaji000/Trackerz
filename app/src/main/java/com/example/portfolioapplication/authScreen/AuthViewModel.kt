@@ -84,7 +84,7 @@ class AuthViewModel() : ViewModel() {
                                     ))
                                     preference.setUserName(user.displayName?:"")
                                     preference.setUserEmailId(user.email?:"")
-                                    preference.setUserImageUrl(user.photoUrl?.toString()?:"")
+                                    //preference.setUserImageUrl(user.photoUrl?.toString()?:"")
                                     viewModelScope.launch {
                                         delay(4000)
                                         _authState.update { state ->
@@ -155,7 +155,7 @@ class AuthViewModel() : ViewModel() {
                                 val uid = user?.uid
                                 preference.setUserName(user?.displayName?:"")
                                 preference.setUserEmailId(user?.email?:"")
-                                preference.setUserImageUrl(user?.photoUrl?.toString()?:"")
+                                //preference.setUserImageUrl(user?.photoUrl?.toString()?:"")
                                 println("Firebase Auth Success: $name, $email, $uid")
                                 viewModelScope.launch {
                                     delay(4000)

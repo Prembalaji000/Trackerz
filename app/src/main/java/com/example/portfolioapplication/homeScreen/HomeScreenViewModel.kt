@@ -18,6 +18,7 @@ class HomeScreenViewModel(val dao: ExpenseDao, context: Context) : ViewModel() {
     val preference = sharedPreference(context)
     val userName = preference.getUserName()
     val userImage = preference.getUserImageUrl()
+    val showCase = preference.getShowCase()
 
     val expenses: StateFlow<List<ExpenseEntity>> = dao.getAllExpense()
         .stateIn(
@@ -25,6 +26,10 @@ class HomeScreenViewModel(val dao: ExpenseDao, context: Context) : ViewModel() {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun onShowCaseCompleted(isShowed: Boolean){
+        preference.setShowShowCase(isShowed)
+    }
 
     suspend fun deleteExpense(expenseEntity: ExpenseEntity){
         dao.deleteExpense(expenseEntity)
