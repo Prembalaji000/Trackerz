@@ -216,7 +216,7 @@ fun HomeScreen(
     }
 
     IntroShowcase(
-        showIntroShowCase = showAppIntro,
+        showIntroShowCase = toShowCase,
         dismissOnClickOutside = false,
         onShowCaseCompleted = {
             onShowCaseCompleted(false)
@@ -371,7 +371,7 @@ fun HomeScreen(
                             )
                         }
                     }
-                    Box(
+Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)
