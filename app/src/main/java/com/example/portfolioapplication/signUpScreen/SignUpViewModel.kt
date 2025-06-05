@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 class SignUpViewModel() : ViewModel(){
 
     private val auth = Firebase.auth
-    private val _loginState = MutableStateFlow(LoginState())
+    private val _loginState = MutableStateFlow(SignUpState())
     val loginState = _loginState.asStateFlow()
 
     fun signUpWithEmail(email: String, password: String, navController: NavController, context: Context) {
@@ -62,14 +62,14 @@ class SignUpViewModel() : ViewModel(){
     }
 }
 
-sealed class SignUpState {
+/*sealed class SignUpState {
     object Idle : SignUpState()
     object Loading : SignUpState()
     object Success : SignUpState()
     data class Error(val message: String) : SignUpState()
-}
+}*/
 
 
-data class LoginState(
+data class SignUpState(
     var isLoading: Boolean = false,
 )

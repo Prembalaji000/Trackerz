@@ -40,11 +40,7 @@ fun AuthScreenRouter(
                 context = context,
                 scope = lifecycleOwner.lifecycleScope,
                 launcher = null,
-                onNavigate = {
-                    navController.navigate(it){
-                        popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
-                    }
-                }
+                onNavigate = navController
             )
         } else {
             Toast.makeText(context, "Sign-In Failed", Toast.LENGTH_SHORT).show()
@@ -61,18 +57,12 @@ fun AuthScreenRouter(
                 context = context,
                 scope = scope,
                 launcher = launcher,
-                onNavigate = { screen ->
-                    navController.navigate(screen)
-                }
+                onNavigate = navController
             )
         },
         loginWithFacebook = {
             viewModel.loginWithFacebook(
-                onNavigate = {
-                    navController.navigate(it){
-                        popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
-                    }
-                },
+                onNavigate = navController,
                 context = context,
                 callbackManager = callbackManager,
             )

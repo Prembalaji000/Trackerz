@@ -40,6 +40,7 @@ import com.example.portfolioapplication.Screens
 import com.example.portfolioapplication.homeScreen.ExpenseTextView
 import com.example.portfolioapplication.homeScreen.TransactionItem
 import com.example.portfolioapplication.homeScreen.add_expense.ExpenseDropDown
+import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.line
 import com.example.todoroomdb.db.ExpenseEntity
@@ -115,7 +116,7 @@ fun TransactionListScreen(
                     )
                     Spacer(modifier = modifier.padding(6.dp))
                 }
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 22.dp))
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 22.dp), color = Grey50)
             }
 
         }

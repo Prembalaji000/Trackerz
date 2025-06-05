@@ -60,12 +60,12 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         delay(6000)
         if (preference.getCheckRememberMe()){
-            navController.navigate(Screens.HomeScreen){
-                popUpTo(Screens.SplashScreen) { inclusive = true  }
+            navController.navigate(Screens.HomeScreen.route){
+                popUpTo(Screens.SplashScreen.route) { inclusive = true  }
             }
         } else {
-            navController.navigate(Screens.AuthScreen) {
-                popUpTo(Screens.SplashScreen) { inclusive = true }
+            navController.navigate(Screens.WelcomeScreen.route) {
+                popUpTo(Screens.SplashScreen.route) { inclusive = true }
             }
         }
     }

@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.portfolioapplication.Screens
-import com.example.portfolioapplication.signUpScreen.LoginState
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,8 +46,10 @@ class LoginViewModel(context: Context, private val preference: sharedPreference)
                     viewModelScope.launch {
                         delay(4000)
                         _loginState.update { it.copy(isLoading = false) }
-                        navController.navigate(Screens.HomeScreen){
-                            popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+                        navController.navigate(
+                            Screens.HomeScreen.createRoute(showDialog = true)
+                        ) {
+                            popUpTo(navController.currentDestination?.id ?: 0) { inclusive = true }
                         }
                     }
                 } else {

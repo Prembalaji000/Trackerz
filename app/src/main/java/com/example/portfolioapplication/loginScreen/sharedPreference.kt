@@ -119,6 +119,6 @@ class sharedPreference(context: Context){
     }
 
     fun getShowCase(): Boolean{
-        return sharedPref.getBoolean(KEY_SHOW_SHOWCASE, true)
+        return sharedPref.getBoolean(KEY_SHOW_SHOWCASE, false)
     }
 }

@@ -42,9 +42,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Divider
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Check
@@ -58,10 +60,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -123,10 +127,13 @@ import com.example.portfolioapplication.dashBoardScreen.BottomSheetContent
 import com.example.portfolioapplication.fixImageRotation
 import com.example.portfolioapplication.loginScreen.sharedPreference
 import com.example.portfolioapplication.signUpScreen.AnimatedLoader
+import com.example.portfolioapplication.ui.theme.DarkBlue96
 import com.example.portfolioapplication.ui.theme.Grey30
 import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
+import com.example.portfolioapplication.ui.theme.darkBlue
 import com.example.portfolioapplication.ui.theme.line
+import com.example.portfolioapplication.ui.theme.redAccent100
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.delay
@@ -147,7 +154,10 @@ fun SettingPreview(){
         addButtonClick = {_,_ ->},
         isRefresh = false,
         isDarkMode = false,
-        onThemeToggle = {}
+        onThemeToggle = {},
+        onCloudBackUp = {},
+        isUploadSuccess = false,
+        getData = {}
     )
 }
 
@@ -163,7 +173,10 @@ fun SettingScreen(
     addButtonClick: (String, String?) -> Unit,
     isRefresh: Boolean,
     isDarkMode: Boolean,
-    onThemeToggle: () -> Unit
+    onThemeToggle: () -> Unit,
+    onCloudBackUp: () -> Unit,
+    isUploadSuccess: Boolean,
+    getData: () -> Unit
 ) {
     var userName by remember { mutableStateOf(initialUserName) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -288,12 +301,8 @@ fun SettingScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(12.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (isDarkMode) Color.Black else Grey50,
-                                        shape = RoundedCornerShape(16.dp)
-                                    ),
+                                    .border(width = 1.dp, color = Grey50, shape = RoundedCornerShape(16.dp))
+                                    .clip(RoundedCornerShape(16.dp)),
                                 colors = CardDefaults.cardColors(
                                     containerColor = Grey30
                                 )
@@ -308,6 +317,12 @@ fun SettingScreen(
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        Image(
+                                            modifier = Modifier.size(28.dp),
+                                            painter = painterResource(id = R.drawable.ic_light_theme),
+                                            contentDescription = "theme_icon"
+                                        )
+                                        Spacer(modifier = Modifier.padding(6.dp))
                                         Text(
                                             text = stringResource(id = R.string.theme_mode),
                                             color = Color.White,
@@ -326,6 +341,44 @@ fun SettingScreen(
                                         )
                                     )
                                 }
+                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Grey50)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp,vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        modifier = Modifier,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Image(
+                                            modifier = Modifier.size(28.dp),
+                                            painter = painterResource(id = R.drawable.ic_icloud),
+                                            contentDescription = "cloud_icon1"
+                                        )
+                                        Spacer(modifier = Modifier.padding(6.dp))
+                                        Text(
+                                            text = "iCloud sync",
+                                            textAlign = TextAlign.Center,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.White
+                                        )
+                                    }
+
+                                    Switch(
+                                        checked = isUploadSuccess,
+                                        onCheckedChange = { onCloudBackUp.invoke() },
+                                        colors = SwitchDefaults.colors(
+                                            checkedTrackColor = Color(0xFF4CAF50),
+                                            uncheckedTrackColor = Color(0xFF3A3A3C),
+                                            checkedThumbColor = Color.White,
+                                            uncheckedThumbColor = Color.White
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
@@ -336,7 +389,7 @@ fun SettingScreen(
                             .fillMaxWidth()
                             .padding(bottom = 18.dp, start = 6.dp, end = 6.dp)
                     ) {
-                        SignOutButton(onSignOut = onSignOut)
+                        SignOutButton(onSignOut = onSignOut, title = "Sign Out")
                     }
                 }
             )
@@ -458,7 +511,7 @@ fun ProfileView(
 }
 
 @Composable
-fun SignOutButton(onSignOut:() -> Unit){
+fun SignOutButton(onSignOut:() -> Unit, title: String){
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
     )
@@ -474,7 +527,7 @@ fun SignOutButton(onSignOut:() -> Unit){
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Sign Out",
+                text = title,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -583,7 +636,13 @@ fun EditProfile(
                     fontSize = 12.sp,
                     color = if (isDarkMode) Color.Black else Grey50.copy(alpha = 0.2f),
                 )
-            }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Grey50,
+                unfocusedBorderColor = Grey50,
+                cursorColor = Color.Black,
+                selectionColors = TextSelectionColors(handleColor = Grey50, backgroundColor = darkBlue)
+            ),
         )
         Spacer(modifier = Modifier.padding(6.dp))
         Text(

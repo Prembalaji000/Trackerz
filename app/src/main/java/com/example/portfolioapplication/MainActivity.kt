@@ -26,9 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.codewithfk.expensetracker.android.feature.add_expense.AddExpenseViewModel
 import com.example.portfolioapplication.authScreen.AuthScreenRouter
 import com.example.portfolioapplication.authScreen.AuthViewModel
@@ -36,6 +39,9 @@ import com.example.portfolioapplication.authScreen.AuthViewModelFactory
 import com.example.portfolioapplication.dashBoardScreen.DashBoardRouter
 import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModel
 import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModelFactory
+import com.example.portfolioapplication.forgotPasswordScreen.ForgotPasswordScreenRouter
+import com.example.portfolioapplication.forgotPasswordScreen.ForgotPasswordViewModel
+import com.example.portfolioapplication.forgotPasswordScreen.ForgotPasswordViewModelFactory
 import com.example.portfolioapplication.homeScreen.HomeScreenRouter
 import com.example.portfolioapplication.homeScreen.HomeScreenViewModel
 import com.example.portfolioapplication.homeScreen.HomeScreenViewModelFactor
@@ -45,6 +51,7 @@ import com.example.portfolioapplication.loginScreen.LoginRouter
 import com.example.portfolioapplication.loginScreen.LoginViewModel
 import com.example.portfolioapplication.loginScreen.LoginViewModelFactory
 import com.example.portfolioapplication.loginScreen.sharedPreference
+import com.example.portfolioapplication.settingScreen.ExpenseRepository
 import com.example.portfolioapplication.settingScreen.SettingRouter
 import com.example.portfolioapplication.settingScreen.SettingViewModel
 import com.example.portfolioapplication.settingScreen.SettingViewModelFactory
@@ -52,6 +59,7 @@ import com.example.portfolioapplication.signUpScreen.SignUpRouter
 import com.example.portfolioapplication.signUpScreen.SignUpViewModel
 import com.example.portfolioapplication.signUpScreen.SignUpViewModelFactory
 import com.example.portfolioapplication.splashScreen.SplashScreen
+import com.example.portfolioapplication.splashScreen.WelcomeScreen
 import com.example.portfolioapplication.ui.theme.PortfolioApplicationTheme
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.facebook.CallbackManager
@@ -120,9 +128,131 @@ fun Navigation(
     NavHost(
         modifier = Modifier,
         navController = navController,
-        startDestination = Screens.SplashScreen
+        startDestination = Screens.SplashScreen.route
     ) {
-        composable<Screens.SplashScreen>{
+        composable(
+            route = Screens.SplashScreen.route,
+        ){
+            SplashScreen(
+                modifier = modifier,
+                navController = navController,
+                preference = preference
+            )
+        }
+        composable(
+            route = Screens.WelcomeScreen.route,
+        ){
+            WelcomeScreen(
+                modifier = modifier,
+                navController = navController,
+                preference = preference
+            )
+        }
+        composable(
+            route = Screens.AuthScreen.route,
+        ){
+            val viewModel: AuthViewModel = viewModel(
+                factory = AuthViewModelFactory()
+            )
+            AuthScreenRouter(
+                viewModel = viewModel,
+                context = context,
+                modifier = modifier,
+                callbackManager = callbackManager,
+                navController = navController
+            )
+        }
+        composable(
+            route = Screens.SignUpScreen.route,
+        ){
+            val viewModel : SignUpViewModel = viewModel(
+                factory = SignUpViewModelFactory()
+            )
+            SignUpRouter(
+                modifier = modifier,
+                viewModel = viewModel,
+                context = context,
+                navController = navController
+            )
+        }
+        composable(
+            route = Screens.LoginScreen.route,
+        ){
+            val loginViewModel: LoginViewModel = viewModel(
+                factory = LoginViewModelFactory(context)
+            )
+            LoginRouter(
+                viewModel = loginViewModel,
+                modifier = modifier,
+                navController = navController,
+                context = context
+            )
+        }
+        composable(
+            route = Screens.ForgotPasswordScreen.route,
+        ){
+            val viewModel : ForgotPasswordViewModel = viewModel(
+                factory = ForgotPasswordViewModelFactory()
+            )
+            ForgotPasswordScreenRouter(
+                viewModel = viewModel,
+                navController = navController,
+                modifier = modifier
+            )
+        }
+        composable(
+            route = Screens.TransactionsScreen.route,
+        ){
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val repo = ExpenseRepository(expenseDao = expenseDao)
+            val viewModel = HomeScreenViewModel(dao = expenseDao, context, repo)
+            TransactionListScreenRouter(
+                modifier = modifier,
+                viewModel = viewModel,
+                navController = navController
+            )
+        }
+        composable(
+            route = Screens.SettingScreen.route,
+        ){
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val repo = ExpenseRepository(expenseDao = expenseDao)
+            val viewModel: SettingViewModel = viewModel(
+                factory = SettingViewModelFactory(repo, context)
+            )
+            SettingRouter(
+                viewModel = viewModel,
+                modifier = modifier,
+                navController = navController
+            )
+        }
+        composable(
+            route = Screens.HomeScreen.route,
+            arguments = listOf(
+                navArgument("showWelcomeMessage") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ){ backStackEntry ->
+            val showWelcomeMessage = backStackEntry.arguments?.getBoolean("showWelcomeMessage") ?: false
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val repo = ExpenseRepository(expenseDao = expenseDao)
+            val viewModel : HomeScreenViewModel = viewModel(
+                factory = HomeScreenViewModelFactor(repo, expenseDao, context)
+            )
+            val expenseViewModel = AddExpenseViewModel(dao = expenseDao)
+            HomeScreenRouter(
+                viewModel = viewModel,
+                expenseViewModel = expenseViewModel,
+                isShowDialog = showWelcomeMessage,
+                modifier = modifier,
+                navController = navController
+            )
+        }
+
+
+        /*composable<Screens.SplashScreen>{
             SplashScreen(
                 modifier = modifier,
                 navController = navController,
@@ -158,6 +288,7 @@ fun Navigation(
                 context = context
             )
         }
+
         composable<Screens.SignUpScreen>(
             enterTransition = { fadeIn(animationSpec = tween(700)) },
             exitTransition = { fadeOut(animationSpec = tween(300)) }
@@ -187,8 +318,10 @@ fun Navigation(
             enterTransition = { fadeIn(animationSpec = tween(700)) },
             exitTransition = { fadeOut(animationSpec = tween(300)) }
         ){
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val repo = ExpenseRepository(expenseDao = expenseDao)
             val viewModel: SettingViewModel = viewModel(
-                factory = SettingViewModelFactory(context)
+                factory = SettingViewModelFactory(repo, context)
             )
             SettingRouter(
                 viewModel = viewModel,
@@ -196,18 +329,22 @@ fun Navigation(
                 navController = navController
             )
         }
+
         composable<Screens.HomeScreen>(
             enterTransition = { fadeIn(animationSpec = tween(700)) },
             exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ) {
+        ) { backStackEntry ->
+            val homeScreen = backStackEntry.toRoute<Screens.HomeScreen>()
             val expenseDao = MainApplication.expenseData.expenseDao()
+            val repo = ExpenseRepository(expenseDao = expenseDao)
             val viewModel : HomeScreenViewModel = viewModel(
-                factory = HomeScreenViewModelFactor(expenseDao, context)
+                factory = HomeScreenViewModelFactor(repo, expenseDao, context)
             )
             val expenseViewModel = AddExpenseViewModel(dao = expenseDao)
             HomeScreenRouter(
                 viewModel = viewModel,
                 expenseViewModel = expenseViewModel,
+                isShowDialog = homeScreen.showDialog,
                 modifier = modifier,
                 navController = navController
             )
@@ -225,13 +362,14 @@ fun Navigation(
             exitTransition = { fadeOut(animationSpec = tween(300)) }
         ) {
             val expenseDao = MainApplication.expenseData.expenseDao()
-            val viewModel = HomeScreenViewModel(dao = expenseDao, context)
+            val repo = ExpenseRepository(expenseDao = expenseDao)
+            val viewModel = HomeScreenViewModel(dao = expenseDao, context, repo)
             TransactionListScreenRouter(
                 modifier = modifier,
                 viewModel = viewModel,
                 navController = navController
             )
-        }
+        }*/
     }
 }
 

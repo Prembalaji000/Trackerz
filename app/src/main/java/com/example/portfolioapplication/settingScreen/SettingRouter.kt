@@ -6,6 +6,9 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -26,17 +29,18 @@ fun SettingRouter(
     val userName by viewModel.userName.collectAsState()
     val userImageUrl by viewModel.userImage.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    var isSuccessfullyUpload by remember { mutableStateOf(false) }
 
     SettingScreen(
         modifier = modifier,
         onBackButtonClick = {
-            navController.navigate(Screens.HomeScreen){
+            navController.navigate(Screens.HomeScreen.route){
                 popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
             }
         },
         onSignOut = {
             //preference.clearUserCredentials()
-            navController.navigate(Screens.LoginScreen){
+            navController.navigate(Screens.LoginScreen.route){
                 popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
             }
         },
@@ -44,7 +48,6 @@ fun SettingRouter(
         userEmail = userEmail,
         userImageUrl = userImageUrl,
         addButtonClick = { name, uri ->
-            println("addButtonClick 3 $name $uri")
             if (name.isNotEmpty()){
                 preference.setUserName(name)
             }
@@ -57,6 +60,9 @@ fun SettingRouter(
         },
         isRefresh = isRefreshing,
         isDarkMode = viewModel.isDarkMode.collectAsState().value,
-        onThemeToggle = { viewModel.toggleTheme() }
+        onThemeToggle = { viewModel.toggleTheme() },
+        onCloudBackUp = { viewModel.backupToCloud( isUploadSuccessful = { isSuccessfullyUpload = it } ) },
+        isUploadSuccess = isSuccessfullyUpload,
+        getData = { viewModel.syncFromCloudToRoom(context) }
     )
 }

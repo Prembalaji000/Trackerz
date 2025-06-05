@@ -26,7 +26,12 @@ fun LoginRouter(
         onLoginClick = { email, password ->
             viewModel.loginUser(email = email, password = password, navController = navController, context = context) },
         onButtonClick = {
-            navController.navigate(Screens.SignUpScreen){
+            navController.navigate(Screens.SignUpScreen.route){
+                popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+            }
+        },
+        onForgotPasswordClick = {
+            navController.navigate(Screens.ForgotPasswordScreen.route){
                 popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
             }
         },

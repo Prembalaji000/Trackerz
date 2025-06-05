@@ -30,7 +30,7 @@ fun SignUpRouter(
         isLoading = loginState.isLoading,
         isDarkMode = preference.isDarkModeEnabled(),
         onClickSocials = {
-            navController.navigate(Screens.AuthScreen){
+            navController.navigate(Screens.AuthScreen.route){
                 popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
             }
         }

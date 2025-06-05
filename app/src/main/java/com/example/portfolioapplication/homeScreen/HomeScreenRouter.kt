@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -34,14 +35,17 @@ fun HomeScreenRouter(
     viewModel: HomeScreenViewModel,
     expenseViewModel: AddExpenseViewModel,
     navController: NavController,
+    isShowDialog: Boolean,
     modifier: Modifier
 ){
     val state = viewModel.expenses.collectAsState(initial = emptyList())
+    val loginState by viewModel.HomeScreenStates.collectAsStateWithLifecycle()
     val expense = viewModel.getTotalExpense(state.value)
     val income = viewModel.getTotalIncome(state.value)
     val balance = viewModel.getBalance(state.value)
     var isFromAddExpense by mutableStateOf(false)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     HomeScreen(
         modifier = modifier,
@@ -49,17 +53,17 @@ fun HomeScreenRouter(
         userImageUrl = viewModel.userImage?:"",
         onAddExpenseClicked = {
             isFromAddExpense = false
-            navController.navigate(Screens.AddExpenseScreen)
+            navController.navigate(Screens.AddExpenseScreen.route)
         },
         onAddIncomeClicked = {
             isFromAddExpense = true
-            navController.navigate(Screens.AddExpenseScreen)
+            navController.navigate(Screens.AddExpenseScreen.route)
         },
         balance = balance,
         income = income,
         expense = expense,
         onSeeAllClicked = {
-            navController.navigate(Screens.TransactionsScreen)
+            navController.navigate(Screens.TransactionsScreen.route)
         },
         expenseList = state.value,
         onDeleteTransaction = {
@@ -68,7 +72,7 @@ fun HomeScreenRouter(
             }
         },
         settingButton = {
-            navController.navigate(Screens.SettingScreen){
+            navController.navigate(Screens.SettingScreen.route){
                 popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
             }
         },
@@ -78,6 +82,14 @@ fun HomeScreenRouter(
             }
         },
         toShowCase = viewModel.showCase,
-        onShowCaseCompleted = { viewModel.onShowCaseCompleted(it) }
+        onShowCaseCompleted = { viewModel.onShowCaseCompleted(it) },
+        hasData = viewModel.hasData,
+        toShowDialog = isShowDialog,
+        onDismissDialog = { viewModel.hasData = false },
+        onButtonClick = {
+            viewModel.hasData = false
+            val data = viewModel.expenseData
+            viewModel.toStoreData(expense = data, context = context) },
+        isLoading = loginState.isLoading
     )
 }

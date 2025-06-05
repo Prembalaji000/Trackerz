@@ -63,7 +63,9 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.rememberDismissState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -124,6 +126,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.codewithfk.expensetracker.android.utils.Utils
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.ui.theme.Grey30
@@ -143,6 +147,7 @@ import com.example.portfolioapplication.showCase.IntroShowcase
 import com.example.portfolioapplication.showCase.IntroShowcaseScope
 import com.example.portfolioapplication.showCase.theme.component.ShowcaseStyle
 import com.example.portfolioapplication.showCase.theme.component.rememberIntroShowcaseState
+import com.example.portfolioapplication.signUpScreen.AnimatedLoader
 import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.line
@@ -167,7 +172,12 @@ fun HomeScreenPreview(){
         onAddExpenseClick = {},
         settingButton = {},
         toShowCase = false,
-        onShowCaseCompleted = {}
+        onShowCaseCompleted = {},
+        hasData = false,
+        toShowDialog = false,
+        onDismissDialog = {},
+        onButtonClick = {},
+        isLoading = false
     )
 }
 
@@ -190,7 +200,12 @@ fun HomeScreen(
     onAddExpenseClick: (model: ExpenseEntity) -> Unit,
     settingButton: () -> Unit,
     toShowCase: Boolean,
-    onShowCaseCompleted: (Boolean) -> Unit
+    onShowCaseCompleted: (Boolean) -> Unit,
+    hasData: Boolean,
+    toShowDialog: Boolean,
+    onDismissDialog: (Boolean) -> Unit,
+    onButtonClick:() -> Unit,
+    isLoading: Boolean
 ) {
     val context = LocalContext.current
     val imageLoader = ImageLoader(context)
@@ -219,7 +234,6 @@ fun HomeScreen(
         showIntroShowCase = toShowCase,
         dismissOnClickOutside = false,
         onShowCaseCompleted = {
-            onShowCaseCompleted(false)
             showAppIntro = false
         },
         state = introShowcaseState,
@@ -244,6 +258,7 @@ fun HomeScreen(
                 )
             }
         ){
+            AnimatedLoader(isLoading = isLoading)
             Surface(
                 modifier = modifier.fillMaxSize()
             ) {
@@ -310,7 +325,7 @@ fun HomeScreen(
                                 style = ShowcaseStyle.Default.copy(
                                     backgroundColor = Color(0xFF9AD0EC), // specify color of background
                                     backgroundAlpha = 0.98f, // specify transparency of background
-                                    targetCircleColor = Color.White // specify color of target circle
+                                    targetCircleColor = White // specify color of target circle
                                 ),
                                 content = {
                                     Column {
@@ -322,13 +337,13 @@ fun HomeScreen(
 
                                         androidx.compose.material.Text(
                                             text = "Profile View!!",
-                                            color = Color.Black,
+                                            color = Black,
                                             fontSize = 24.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                         androidx.compose.material.Text(
-                                            text = "You can view and edit your profile",
-                                            color = Color.Black,
+                                            text = "You can view, upload data to cloud and edit your profile",
+                                            color = Black,
                                             fontSize = 16.sp
                                         )
                                     }
@@ -371,10 +386,10 @@ fun HomeScreen(
                             )
                         }
                     }
-Box(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
+                            .padding(end = 10.dp)
                             .align(Alignment.BottomEnd),
                         contentAlignment = Alignment.BottomEnd
                     ) {
@@ -398,10 +413,15 @@ Box(
                     }
                 }
             }
+            if (hasData && toShowDialog){
+                StoreDataDialog(
+                    onDismiss = { onDismissDialog(false) },
+                    onButtonClick = onButtonClick
+                )
+            }
         }
     }
 }
-
 
 @Composable
 fun IntroShowcaseScope.MultiFloatingActionButton(
@@ -431,7 +451,7 @@ fun IntroShowcaseScope.MultiFloatingActionButton(
                         Icon(
                             painter = painterResource(R.drawable.ic_income),
                             contentDescription = "Add Income",
-                            tint = Color.White
+                            tint = White
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -448,7 +468,7 @@ fun IntroShowcaseScope.MultiFloatingActionButton(
                         Icon(
                             painter = painterResource(R.drawable.ic_expense),
                             contentDescription = "Add Expense",
-                            tint = Color.White
+                            tint = White
                         )
                     }
                 }
@@ -464,7 +484,7 @@ fun IntroShowcaseScope.MultiFloatingActionButton(
                         style = ShowcaseStyle.Default.copy(
                             backgroundColor = Color(0xFF1C0A00),
                             backgroundAlpha = 0.98f,
-                            targetCircleColor = Color.White
+                            targetCircleColor = White
                         ),
                         content = {
                             Column {
@@ -476,13 +496,13 @@ fun IntroShowcaseScope.MultiFloatingActionButton(
 
                                 androidx.compose.material.Text(
                                     text = "To add item",
-                                    color = Color.White,
+                                    color = White,
                                     fontSize = 24.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 androidx.compose.material.Text(
                                     text = "You can add income and expenses",
-                                    color = Color.White,
+                                    color = White,
                                     fontSize = 16.sp
                                 )
                             }
@@ -638,7 +658,7 @@ fun TransactionList(
                         modifier = modifier,
                         title = item.title,
                         date = Utils.formatStringDateToMonthDayYear(item.date),
-                        color = if (item.type == "Income") line else Color.Black
+                        color = if (item.type == "Income") line else Black
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -749,7 +769,7 @@ fun TransactionItemContent(expense: ExpenseEntity, removeOuterBorder: Boolean = 
         amount = Utils.formatCurrency(amount),
         icon = icon,
         date = Utils.formatStringDateToMonthDayYear(expense.date),
-        color = if (expense.type == "Income") line else Color.Black,
+        color = if (expense.type == "Income") line else Black,
         modifier = Modifier,
         removeOuterBorder = removeOuterBorder
     )
@@ -780,7 +800,7 @@ fun TransactionItem(
                 }
             )
             .background(
-                Color.White,
+                White,
                 shape = if (removeOuterBorder) RectangleShape else RoundedCornerShape(16.dp)
             )
             .padding(8.dp),
@@ -825,10 +845,10 @@ fun CardRowItem(modifier: Modifier, title: String, amount: String, imaget: Int) 
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.size(8.dp))
-            ExpenseTextView(text = title, color = Color.White)
+            ExpenseTextView(text = title, color = White)
         }
         Spacer(modifier = Modifier.size(4.dp))
-        ExpenseTextView(text = amount, color = Color.White)
+        ExpenseTextView(text = amount, color = White)
     }
 }
 
@@ -953,57 +973,6 @@ fun BottomSheet(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        /*TitleComponent("Amount")
-        OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it.filter { ch -> ch.isDigit() || ch == '.' } },
-            visualTransformation = {
-                TransformedText(
-                    AnnotatedString("$${it.text}"),
-                    object : OffsetMapping {
-                        override fun originalToTransformed(offset: Int) = offset + 1
-                        override fun transformedToOriginal(offset: Int) = if (offset > 0) offset - 1 else 0
-                    }
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
-            textStyle = TextStyle(fontSize = 12.sp, color = White),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            placeholder = { ExpenseTextView(text = "Enter amount") },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = White,
-                unfocusedBorderColor = White,
-                disabledBorderColor = White,
-                disabledTextColor = Color.White,
-                disabledPlaceholderColor = Color.Black,
-                focusedTextColor = Color.White,
-            )
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TitleComponent("Date")
-        OutlinedTextField(
-            value = if (date.longValue == 0L) "" else Utils.formatDateToHumanReadableForm(date.longValue),
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { dateDialogVisibility.value = true },
-            enabled = false,
-            shape = RoundedCornerShape(10.dp),
-            textStyle = TextStyle(fontSize = 12.sp, color = Grey50),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = White,
-                unfocusedBorderColor = White,
-                disabledBorderColor = White,
-                disabledTextColor = Color.Black,
-                disabledPlaceholderColor = Color.Black,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-            ),
-            placeholder = { ExpenseTextView(text = "Select date", color = White) }
-        )*/
         Text(
             modifier = Modifier.padding(start = 6.dp, top = 8.dp),
             text = "Enter amount",
@@ -1043,10 +1012,10 @@ fun BottomSheet(
                 )
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = Color.White,
+                backgroundColor = White,
                 focusedBorderColor = Color(0xFFD1D1D1),
                 unfocusedBorderColor = Color(0xFFD1D1D1),
-                cursorColor = Color.Black
+                cursorColor = Black
             ),
             shape = RoundedCornerShape(25.dp),
         )
@@ -1087,10 +1056,10 @@ fun BottomSheet(
                 )
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = Color.White,
+                backgroundColor = White,
                 focusedBorderColor = Color(0xFFD1D1D1),
                 unfocusedBorderColor = Color(0xFFD1D1D1),
-                cursorColor = Color.Black
+                cursorColor = Black
             ),
             shape = RoundedCornerShape(25.dp),
         )
@@ -1167,7 +1136,7 @@ fun BottomSheet(
                 androidx.compose.material.Text(
                     text = "Add ${if (isIncome) "Income" else "Expense"}",
                     fontSize = 13.sp,
-                    color = Color.White
+                    color = White
                 )
             }
         }
@@ -1196,7 +1165,7 @@ fun ActionIcon(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
-    tint: Color = Color.White
+    tint: Color = White
 ) {
     androidx.compose.material3.IconButton(
         onClick = onClick,
@@ -1284,6 +1253,96 @@ fun SwipeableItemWithActions(
                 }
         ) {
             content()
+        }
+    }
+}
+@Preview
+@Composable
+fun StoreDataDialogPreview(){
+    StoreDataDialog(onButtonClick = {}, onDismiss = {})
+}
+
+@Composable
+fun StoreDataDialog(onDismiss: () -> Unit, onButtonClick: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnClickOutside = false)
+    ) {
+        Surface(
+            modifier = Modifier
+              //  .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(16.dp),
+            color = bgColor
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .padding(bottom = 12.dp),
+                    painter = painterResource(id = R.drawable.ic_cloud_server),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = "cloud icon"
+                )
+                Text(
+                    text = "Data found on cloud",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = White,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "Retrieve data from the cloud? Existing local data will be deleted",
+                    modifier = Modifier.padding(top = 12.dp),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = White,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 20.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp),
+                        shape = RoundedCornerShape(25.dp),
+                        border = BorderStroke(1.dp, Color(0xFFD1D1D1))
+                    ) {
+                        Text(
+                            text = "Skip",
+                            fontSize = 13.sp,
+                            color = Color(0xFF757575)
+                        )
+                    }
+                    Button(
+                        onClick = onButtonClick,
+                        modifier = Modifier
+                            .weight(1f),
+                        colors = ButtonColors(
+                            containerColor = line,
+                            contentColor = line,
+                            disabledContainerColor = line,
+                            disabledContentColor = line
+                        ),
+                        shape = RoundedCornerShape(25.dp)
+                    ) {
+                        Text(
+                            text = "Store data",
+                            fontSize = 13.sp,
+                            color = White
+                        )
+                    }
+                }
+            }
         }
     }
 }

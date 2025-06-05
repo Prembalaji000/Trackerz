@@ -20,7 +20,6 @@ import androidx.navigation.NavController
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.Screens
 import com.example.portfolioapplication.loginScreen.sharedPreference
-import com.example.portfolioapplication.signUpScreen.LoginState
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -57,7 +56,7 @@ class AuthViewModel() : ViewModel() {
         context: Context,
         scope: CoroutineScope,
         launcher: ActivityResultLauncher<Intent>?,
-        onNavigate: (Screens) -> Unit
+        onNavigate: NavController
     ) {
         val preference = sharedPreference(context)
         val credentialManager = CredentialManager.create(context)
@@ -90,7 +89,11 @@ class AuthViewModel() : ViewModel() {
                                         _authState.update { state ->
                                             state.copy(isLoading = false)
                                         }
-                                        onNavigate(Screens.HomeScreen)
+                                        onNavigate.navigate(
+                                            Screens.HomeScreen.createRoute(showDialog = true)
+                                        ) {
+                                            popUpTo(onNavigate.currentDestination?.id ?: 0) { inclusive = true }
+                                        }
                                     }
                                 }
                             }
@@ -114,7 +117,7 @@ class AuthViewModel() : ViewModel() {
         viewModelScope.launch {
             delay(1000)
             _authState.update { it.copy(isLoading = false) }
-            navController.navigate(Screens.LoginScreen){
+            navController.navigate(Screens.LoginScreen.route){
                 popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
             }
         }
@@ -135,7 +138,7 @@ class AuthViewModel() : ViewModel() {
             .build()
     }
 
-    fun loginWithFacebook(context: Context, onNavigate: (Screens) -> Unit, callbackManager: CallbackManager) {
+    fun loginWithFacebook(context: Context, onNavigate: NavController, callbackManager: CallbackManager) {
         val preference = sharedPreference(context)
         val loginManager = LoginManager.getInstance()
         loginManager.logInWithReadPermissions(context as Activity, listOf("email", "public_profile"))
@@ -160,7 +163,11 @@ class AuthViewModel() : ViewModel() {
                                 viewModelScope.launch {
                                     delay(4000)
                                     _authState.update { it.copy(isLoading = false) }
-                                    onNavigate(Screens.HomeScreen)
+                                    onNavigate.navigate(
+                                        Screens.HomeScreen.createRoute(showDialog = true)
+                                    ) {
+                                        popUpTo(onNavigate.currentDestination?.id ?: 0) { inclusive = true }
+                                    }
                                 }
                             } else {
                                 _authState.update { it.copy(isLoading = false) }

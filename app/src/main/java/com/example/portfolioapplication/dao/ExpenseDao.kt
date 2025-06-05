@@ -15,6 +15,9 @@ interface ExpenseDao {
     @Query("SELECT * FROM expense_table")
     fun getAllExpense(): Flow<List<ExpenseEntity>>
 
+    @Query("SELECT * FROM expense_table")
+    suspend fun getAllExpenseOnce(): List<ExpenseEntity>
+
     @Query("SELECT * FROM expense_table WHERE type = 'Expense' ORDER BY amount DESC LIMIT 5")
     fun getTopExpenses(): Flow<List<ExpenseEntity>>
 
@@ -27,6 +30,9 @@ interface ExpenseDao {
 
     @Delete
     suspend fun deleteExpense(expenseEntity: ExpenseEntity)
+
+    @Query("DELETE FROM expense_table")
+    suspend fun clearAll()
 
     @Update
     suspend fun updateExpense(expenseEntity: ExpenseEntity)

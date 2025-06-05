@@ -101,7 +101,7 @@ fun SignUpScreen(
     )
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isEmailValid = email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.isEmpty()
+    val isEmailValid = email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.endsWith(" ") || email.isEmpty()
     val isPasswordValid = password.length >= 6 || password.isEmpty()
 
     Column(

@@ -53,7 +53,7 @@ import com.example.portfolioapplication.ui.theme.line
 @Preview
 @Composable
 fun LoginPreview(){
-    LoginScreen(modifier = Modifier, onButtonClick = {}, onLoginClick = {_,_ ->}, isAddedRememberMe = true, onAddedRememberMe = {  }, isLoading = false, isDarkMode = false)
+    LoginScreen(modifier = Modifier, onButtonClick = {}, onLoginClick = {_,_ ->}, isAddedRememberMe = true, onAddedRememberMe = {  }, onForgotPasswordClick = {}, isLoading = false, isDarkMode = false)
 }
 
 @Composable
@@ -62,6 +62,7 @@ fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
     onButtonClick: () -> Unit,
     onAddedRememberMe: (Boolean) -> Unit,
+    onForgotPasswordClick: () -> Unit,
     isAddedRememberMe :Boolean,
     isLoading : Boolean,
     isDarkMode : Boolean
@@ -72,7 +73,7 @@ fun LoginScreen(
     val context = LocalContext.current
     var email by remember { mutableStateOf(sharedPreference(context).getEmail()?: "") }
     var password by remember { mutableStateOf(sharedPreference(context).getPassword()?: "") }
-    val isEmailValid = email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.isEmpty()
+    val isEmailValid = email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.isEmpty() || email.endsWith(" ")
     val isPasswordValid = password.length >= 6 || password.isEmpty()
 
     Column(
@@ -122,6 +123,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.padding(10.dp))
             RememberMeForgotPasswordRow(
                 modifier = Modifier,
+                onForgotPasswordClick = onForgotPasswordClick,
                 onAddedRememberMe = onAddedRememberMe,
                 isAddedRememberMe = isAddedRememberMe,
                 isDarkMode = isDarkMode
@@ -130,7 +132,7 @@ fun LoginScreen(
             LoginButton(
                 text = "Sign In",
                 onLoginClick = {
-                    onLoginClick(email,password)
+                    onLoginClick(email.removeSuffix(" "), password)
                 }
             )
         }
@@ -159,6 +161,7 @@ fun LoginScreen(
 @Composable
 fun RememberMeForgotPasswordRow(
     modifier: Modifier = Modifier,
+    onForgotPasswordClick: () -> Unit,
     onAddedRememberMe: (Boolean) -> Unit,
     isAddedRememberMe :Boolean,
     isDarkMode : Boolean
@@ -197,7 +200,7 @@ fun RememberMeForgotPasswordRow(
             color = if (isDarkMode) Color.Black else Color.Gray,
             fontSize = 14.sp,
             modifier = Modifier
-                .clickable { /* Navigate to Forgot Password Screen */ }
+                .clickable { onForgotPasswordClick.invoke() }
         )
     }
 }
