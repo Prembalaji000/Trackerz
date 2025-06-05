@@ -45,6 +45,7 @@ This project brings a polished user experience and technical excellence with the
 - **Jetpack Compose**
 - **Kotlin**
 - **Firebase Auth**
+- **Firebase FireStore**
 - **Room Database**
 - **DataStore**
 - **MVVM Architecture**
