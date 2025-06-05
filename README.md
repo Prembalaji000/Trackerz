@@ -58,7 +58,7 @@ This project brings a polished user experience and technical excellence with the
 ![Home](https://github.com/user-attachments/assets/e4f3a799-e8b6-4ffe-8e43-c68399496dd4)
 
 ### 💰 All Transaction Screen  
-![All Transactions](htt  ps://github.com/user-attachments/assets/6b032524-1b69-4892-aa17-0828e8df5742)
+![All Transactions](https://github.com/user-attachments/assets/6b032524-1b69-4892-aa17-0828e8df5742)
 
 ---
 
