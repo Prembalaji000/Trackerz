@@ -36,7 +36,8 @@ This project brings a polished user experience and technical excellence with the
 
 ## 📱 App Screenshots
 
-![trackerz](https://github.com/user-attachments/assets/3f7c3061-3bbb-4e5d-a964-5ae95dc6ed5d)
+![trackerz_screen_shot](https://github.com/user-attachments/assets/a811e2cc-127f-47c2-b445-26eae1d2dec1)
+
 
 ---
 
