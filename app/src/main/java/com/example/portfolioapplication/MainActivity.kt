@@ -46,6 +46,10 @@ import com.example.portfolioapplication.homeScreen.HomeScreenRouter
 import com.example.portfolioapplication.homeScreen.HomeScreenViewModel
 import com.example.portfolioapplication.homeScreen.HomeScreenViewModelFactor
 import com.example.portfolioapplication.homeScreen.add_expense.AddExpenseScreenRouter
+import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreen
+import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreenRouter
+import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreenViewModelFactory
+import com.example.portfolioapplication.homeScreen.reportScreen.ReportViewModel
 import com.example.portfolioapplication.homeScreen.transactionlist.TransactionListScreenRouter
 import com.example.portfolioapplication.loginScreen.LoginRouter
 import com.example.portfolioapplication.loginScreen.LoginViewModel
@@ -241,12 +245,29 @@ fun Navigation(
             val viewModel : HomeScreenViewModel = viewModel(
                 factory = HomeScreenViewModelFactor(repo, expenseDao, context)
             )
+            val settingViewModel: SettingViewModel = viewModel(
+                factory = SettingViewModelFactory(repo, context)
+            )
             val expenseViewModel = AddExpenseViewModel(dao = expenseDao)
             HomeScreenRouter(
                 viewModel = viewModel,
                 expenseViewModel = expenseViewModel,
+                settingViewModel = settingViewModel,
                 isShowDialog = showWelcomeMessage,
                 modifier = modifier,
+                navController = navController
+            )
+        }
+        composable(
+            route = Screens.ReportScreen.route,
+        ){
+            val expenseDao = MainApplication.expenseData.expenseDao()
+            val viewModel : ReportViewModel = viewModel(
+                factory = ReportScreenViewModelFactory(expenseDao)
+            )
+            ReportScreenRouter(
+                modifier = modifier,
+                viewModel = viewModel,
                 navController = navController
             )
         }

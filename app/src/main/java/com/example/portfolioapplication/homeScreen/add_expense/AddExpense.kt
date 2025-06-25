@@ -297,7 +297,7 @@ fun DataForm(
                         name.value,
                         amount.value.toDoubleOrNull() ?: 0.0,
                         Utils.formatDateToHumanReadableForm(date.longValue),
-                        type.value
+                        type.value,
                     )
                     onAddExpenseClick(model)
                 }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)
@@ -404,33 +404,6 @@ fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) ->
                 )
             }
         )
-        /*OutlinedTextField(
-            value = selectedItem.value,
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(),
-            //textStyle = TextStyle(fontFamily = InterFontFamily, color = Color.Black),
-            readOnly = true,
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
-            },
-            shape = RoundedCornerShape(10.dp),
-            textStyle = TextStyle(
-                fontSize = 12.sp,
-                color = White
-            ),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = White,
-                unfocusedBorderColor = White,
-                disabledBorderColor = White,
-                disabledTextColor = Color.Black,
-                disabledPlaceholderColor = Color.Black,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-
-            )
-        )*/
         ExposedDropdownMenu(expanded = expanded.value, onDismissRequest = { }) {
             listOfItems.forEach {
                 DropdownMenuItem(

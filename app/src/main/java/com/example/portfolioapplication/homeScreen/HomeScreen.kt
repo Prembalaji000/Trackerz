@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -59,14 +60,18 @@ import androidx.compose.material.OutlinedButton
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.ModalBottomSheet
@@ -152,6 +157,9 @@ import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.line
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @Preview
@@ -177,13 +185,13 @@ fun HomeScreenPreview(){
         toShowDialog = false,
         onDismissDialog = {},
         onButtonClick = {},
-        isLoading = false
+        isLoading = false,
+        onReportClicked = {}
     )
 }
 
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier,
@@ -205,7 +213,8 @@ fun HomeScreen(
     toShowDialog: Boolean,
     onDismissDialog: (Boolean) -> Unit,
     onButtonClick:() -> Unit,
-    isLoading: Boolean
+    isLoading: Boolean,
+    onReportClicked: () -> Unit
 ) {
     val context = LocalContext.current
     val imageLoader = ImageLoader(context)
@@ -222,6 +231,26 @@ fun HomeScreen(
     }
 
     val introShowcaseState = rememberIntroShowcaseState()
+    var type by remember { mutableStateOf(false) }
+
+    var selectedMonth by remember { mutableStateOf(Calendar.getInstance().get(Calendar.MONTH)) }
+    var selectedYear by remember { mutableStateOf(Calendar.getInstance().get(Calendar.YEAR)) }
+    val formatter = remember { SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH) }
+    val filteredByMonth = expenseList.filter { expenses ->
+        try {
+            if (expenses.type == "Income") type = true else type = false
+            val date = formatter.parse(Utils.formatStringDateToMonthDayYear(expenses.date))
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            calendar.get(Calendar.MONTH) == selectedMonth && calendar.get(Calendar.YEAR) == selectedYear
+        } catch (e: Exception) {
+            false
+        }
+    }
+    val filteredExpenses = filteredByMonth.filter { it.type.equals("Expense", ignoreCase = true) }
+    val filteredIncome = filteredByMonth.filter { it.type.equals("Income", ignoreCase = true) }
+    val totalBalance = filteredIncome.sumOf { it.amount } - filteredExpenses.sumOf { it.amount }
+
     LaunchedEffect(sheetState) {
         scope.launch {
             if (sheetState.isVisible){
@@ -234,6 +263,7 @@ fun HomeScreen(
         showIntroShowCase = toShowCase,
         dismissOnClickOutside = false,
         onShowCaseCompleted = {
+            onShowCaseCompleted(false)
             showAppIntro = false
         },
         state = introShowcaseState,
@@ -370,18 +400,33 @@ fun HomeScreen(
                     ) {
                         CardItem(
                             modifier = Modifier,
-                            balance = balance,
-                            income = income,
-                            expense = expense
+                            balance = Utils.formatCurrency(totalBalance),
+                            income = Utils.formatCurrency(filteredIncome.sumOf { it.amount }),
+                            expense = Utils.formatCurrency(filteredExpenses.sumOf { it.amount }),
+                            onReportClicked = onReportClicked
                         )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                        ) {
+                            MonthTab(
+                                onMonthChanged = { month, year ->
+                                    selectedMonth = month
+                                    selectedYear = year
+                                }
+                            )
+                        }
+
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
                             TransactionList(
                                 modifier = Modifier.fillMaxWidth(),
-                                list = expenseList,
+                                list = filteredByMonth,
                                 onSeeAllClicked = onSeeAllClicked,
+                                isDarkMode = false,
                                 onDeleteTransaction = onDeleteTransaction
                             )
                         }
@@ -431,7 +476,7 @@ fun IntroShowcaseScope.MultiFloatingActionButton(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd) {
+    Box(modifier = modifier, contentAlignment = Alignment.BottomEnd) {
         Column(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -528,7 +573,8 @@ fun CardItem(
     modifier: Modifier,
     balance: String,
     income: String,
-    expense: String
+    expense: String,
+    onReportClicked: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -551,13 +597,14 @@ fun CardItem(
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 ExpenseTextView(
+                    modifier = Modifier.padding(start = 2.dp),
                     text = balance, color = White,
                 )
             }
             Image(
                 painter = painterResource(id = R.drawable.dots_menu),
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterEnd)
+                modifier = Modifier.align(Alignment.CenterEnd).clickable { /*onReportClicked.invoke()*/ }
             )
         }
 
@@ -593,8 +640,9 @@ fun TransactionList(
     modifier: Modifier,
     list: List<ExpenseEntity>,
     title: String = "Recent Transactions",
+    isDarkMode: Boolean,
     onSeeAllClicked: () -> Unit,
-    onDeleteTransaction: (ExpenseEntity) -> Unit
+    onDeleteTransaction: (ExpenseEntity) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -620,7 +668,7 @@ fun TransactionList(
             ) {
                 ExpenseTextView(
                     text = title,
-                    color = White
+                    color = if (isDarkMode) Color.Black else Color.White
                 )
                 if (title == "Recent Transactions") {
                     ExpenseTextView(
@@ -628,25 +676,25 @@ fun TransactionList(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .clickable {
-                                onSeeAllClicked.invoke()
+                                //onSeeAllClicked.invoke()
                             },
-                        color = White
+                        color = if (isDarkMode) Color.Black else Color.White
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(12.dp))
+            Spacer(modifier = Modifier.size(6.dp))
         }
         LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
             items(items = list,
                 key = { item -> item.id ?: 0 }) { item ->
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = 0.dp,
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .fillMaxWidth()
                 ){
                     TransactionItemContent(
+                        isDarkMode = isDarkMode,
                         expense = item,
                         isRevealed = false,
                         onExpanded = {},
@@ -658,7 +706,7 @@ fun TransactionList(
                         modifier = modifier,
                         title = item.title,
                         date = Utils.formatStringDateToMonthDayYear(item.date),
-                        color = if (item.type == "Income") line else Black
+                        color = if (item.type == "Income") line else if (isDarkMode) Color.White else Black
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -669,6 +717,7 @@ fun TransactionList(
 
 @Composable
 fun TransactionItemContent(
+    isDarkMode: Boolean,
     expense: ExpenseEntity,
     isRevealed: Boolean,
     onExpanded: () -> Unit,
@@ -678,7 +727,7 @@ fun TransactionItemContent(
     modifier: Modifier,
     title: String,
     date: String,
-    color: Color
+    color: Color,
 ) {
     val icon = Utils.getItemIcon(expense)
     val amount = if (expense.type == "Income") expense.amount else expense.amount * -1
@@ -708,6 +757,7 @@ fun TransactionItemContent(
         modifier = modifier
     ) {
         Card(
+            backgroundColor = if (isDarkMode) bgColor else Color.White,
             shape = RoundedCornerShape(16.dp),
             elevation = 0.dp,
             modifier = Modifier
@@ -737,12 +787,13 @@ fun TransactionItemContent(
                         ExpenseTextView(
                             text = title,
                             fontSize = 16.sp,
+                            color = if (isDarkMode) Color.White else Color.Black,
                             fontWeight = FontWeight.Medium
                         )
                         ExpenseTextView(
                             text = date,
                             fontSize = 13.sp,
-                            color = Grey30
+                            color = if (isDarkMode) Color.White else Grey30
                         )
                     }
                 }
@@ -760,7 +811,7 @@ fun TransactionItemContent(
 
 
 @Composable
-fun TransactionItemContent(expense: ExpenseEntity, removeOuterBorder: Boolean = false) {
+fun TransactionItemContents(expense: ExpenseEntity, removeOuterBorder: Boolean = false) {
     val icon = Utils.getItemIcon(expense)
     val amount = if (expense.type == "Income") expense.amount else expense.amount * -1
 
@@ -848,7 +899,7 @@ fun CardRowItem(modifier: Modifier, title: String, amount: String, imaget: Int) 
             ExpenseTextView(text = title, color = White)
         }
         Spacer(modifier = Modifier.size(4.dp))
-        ExpenseTextView(text = amount, color = White)
+        ExpenseTextView(modifier = Modifier.padding(start = 4.dp), text = amount, color = White)
     }
 }
 
@@ -906,6 +957,7 @@ fun Preview(){
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
     onAddExpenseClick: (model: ExpenseEntity) -> Unit,
@@ -926,16 +978,29 @@ fun BottomSheet(
     )
     val keyboardController = LocalSoftwareKeyboardController.current
     var isFocused by remember { mutableStateOf(false) }
-    var expanded by remember { mutableStateOf(false) }
     val TitleInteraction = remember { MutableInteractionSource() }
     val context = LocalContext.current
+    val listOfItems = if (isIncome) listOf(
+        "Paypal", "Salary", "Freelance", "Investments", "Bonus",
+        "Rental Income", "Other Income"
+    ) else listOf(
+        "Grocery", "Netflix", "Rent", "Paypal", "Starbucks", "Shopping", "Spotify", "Youtube",
+        "Transport", "Utilities", "Dining Out", "Entertainment", "Healthcare",
+        "Insurance", "Subscriptions", "Education", "Debt Payments",
+        "Gifts & Donations", "Travel", "Other Expenses", "Kite", "Coin"
+    )
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+    val selectedItem = remember {
+        mutableStateOf(listOfItems[0])
+    }
 
 
     Column(
         modifier = Modifier
             .navigationBarsPadding()
             .fillMaxWidth()
-            .background(bgColor)
             .padding(16.dp)
             .imePadding()
     ) {
@@ -958,18 +1023,70 @@ fun BottomSheet(
             color = White,
             fontSize = 14.sp
         )
-        ExpenseDropDown(
+       /* ExpenseDropDown(
             listOfItems = if (isIncome) listOf(
                 "Paypal", "Salary", "Freelance", "Investments", "Bonus",
                 "Rental Income", "Other Income"
             ) else listOf(
-                "Grocery", "Netflix", "Rent", "Paypal", "Starbucks", "Shopping",
+                "Grocery", "Netflix", "Rent", "Paypal", "Starbucks", "Shopping", "Spotify", "Youtube",
                 "Transport", "Utilities", "Dining Out", "Entertainment", "Healthcare",
                 "Insurance", "Subscriptions", "Education", "Debt Payments",
                 "Gifts & Donations", "Travel", "Other Expenses", "Kite", "Coin"
             ),
             onItemSelected = { name.value = it }
-        )
+        )*/
+        ExposedDropdownMenuBox(expanded = expanded.value, onExpandedChange = { expanded.value = it }) {
+            androidx.compose.material.OutlinedTextField(
+                value = selectedItem.value,
+                onValueChange = {},
+                readOnly = true,
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
+                    .border(
+                        BorderStroke(0.5.dp, Color(0xFFD1D1D1)),
+                        RoundedCornerShape(25.dp)
+                    ),
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color(0xFFD1D1D1),
+                    unfocusedBorderColor = Color(0xFFD1D1D1)
+                ),
+                textStyle = TextStyle(
+                    fontSize = 14.sp,
+                    color = Color(0xFF757575)
+                ),
+                shape = RoundedCornerShape(24.dp),
+                placeholder = {
+                    androidx.compose.material.Text(
+                        modifier = Modifier.padding(start = 8.dp),
+                        text = "Choose the name",
+                        fontSize = 14.sp,
+                    )
+                },
+                trailingIcon = {
+                    //ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
+                    androidx.compose.material.Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Dropdown Arrow",
+                    )
+                }
+            )
+            ExposedDropdownMenu(expanded = expanded.value, onDismissRequest = { }) {
+                listOfItems.forEach {
+                    DropdownMenuItem(
+                        text = { ExpenseTextView(text = it) },
+                        onClick = {
+                            selectedItem.value = it
+                            name.value = (selectedItem.value)
+                            expanded.value = false
+                        })
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -1076,6 +1193,7 @@ fun BottomSheet(
         ){
             OutlinedButton(
                 onClick = {
+                    expanded.value = false
                     keyboardController?.hide()
                     onCancelCLick.invoke()
                     amount = ""
@@ -1100,11 +1218,11 @@ fun BottomSheet(
                 onClick = {
                     keyboardController?.hide()
                     val model = ExpenseEntity(
-                        null,
-                        name.value,
-                        amount.toDoubleOrNull() ?: 0.0,
-                        Utils.formatDateToHumanReadableForm(date.longValue),
-                        type.value,
+                        id = null,
+                        title = name.value,
+                        amount= amount.toDoubleOrNull() ?: 0.0,
+                        date = Utils.formatDateToHumanReadableForm(date.longValue),
+                        type = type.value,
                     )
                     when{
                         model.title.isEmpty() -> {
@@ -1117,7 +1235,7 @@ fun BottomSheet(
                             Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT).show()
                         }
                         else -> {
-                            println("model: ${model.date}")
+                            expanded.value = false
                             onAddExpenseClick(model)
                             Toast.makeText(context, "Expense added successfully", Toast.LENGTH_SHORT).show()
                             amount = ""
@@ -1270,7 +1388,6 @@ fun StoreDataDialog(onDismiss: () -> Unit, onButtonClick: () -> Unit) {
     ) {
         Surface(
             modifier = Modifier
-              //  .fillMaxWidth(0.9f)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(16.dp),
             color = bgColor
@@ -1343,6 +1460,127 @@ fun StoreDataDialog(onDismiss: () -> Unit, onButtonClick: () -> Unit) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun MonthTabPreview(){
+    MonthTab(
+        onMonthChanged = {_, _ ->}
+    )
+}
+
+
+@Composable
+fun MonthTab(
+    onMonthChanged: (month: Int, year: Int) -> Unit
+){
+    val months = listOf(
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    )
+    var selectedYear by remember { mutableStateOf(Calendar.getInstance().get(Calendar.YEAR)) }
+    val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
+    var selectedTab by remember { mutableStateOf(currentMonth) }
+    var startIndex by remember { mutableStateOf((currentMonth / 3) * 3) }
+
+
+    val visibleMonths = months.slice(startIndex until (startIndex + 3).coerceAtMost(months.size))
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF181818), shape = RoundedCornerShape(16.dp))
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ){
+        Row(
+            modifier = Modifier
+                .wrapContentWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = {
+                    if (startIndex >= 3) {
+                        startIndex -= 3
+                    } else {
+                        selectedYear -= 1
+                        startIndex = 9
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Previous Months",
+                    tint = if (startIndex >= 3) Color.White else Color.Gray
+                )
+            }
+            visibleMonths.forEachIndexed { index, month ->
+                TabItemMonth(
+                    month = month,
+                    year = "$selectedYear",
+                    isSelected = selectedTab == (startIndex + index),
+                    onClick = {
+                        onMonthChanged(startIndex + index, selectedYear)
+                        selectedTab = startIndex + index
+                    }
+                )
+            }
+            IconButton(
+                onClick = {
+                    if (startIndex + 3 < months.size) {
+                        startIndex += 3
+                    } else {
+                        selectedYear += 1
+                        startIndex = 0
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "Next Months",
+                    tint = if (startIndex + 3 < months.size) White else Color.Gray
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun TabItemMonth(
+    month: String,
+    year: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isSelected) Color(0xFF242424) else Color.Transparent)
+            .clickable { onClick() }
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = month,
+                fontSize = 14.sp,
+                color = if (isSelected) Color.White else Color.Gray,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            )
+            Text(
+                text = year,
+                fontSize = 14.sp,
+                color = if (isSelected) Color.White else Color.Gray,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            )
         }
     }
 }

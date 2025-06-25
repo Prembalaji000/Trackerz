@@ -20,6 +20,7 @@ fun TransactionListScreenRouter(viewModel: HomeScreenViewModel, navController: N
         state =  state,
         onBackClicked = {
             navController.popBackStack()
-        }
+        },
+        isDarkMode = false
     )
 }

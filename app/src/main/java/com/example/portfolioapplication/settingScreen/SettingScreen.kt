@@ -265,7 +265,7 @@ fun SettingScreen(
                 content = { paddingValue ->
                     AnimatedLoader(isLoading = isRefresh)
                     Column(
-                        modifier = modifier.padding(paddingValue).padding(top = 4.dp),
+                        modifier = modifier.padding(paddingValue).padding(top = 16.dp),
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -417,7 +417,7 @@ fun TopBar(onBackButtonClick:() -> Unit, isDarkMode: Boolean){
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 18.dp)
         ) {
-            Image(
+            /*Image(
                 modifier = Modifier
                     .size(32.dp)
                     .align(Alignment.CenterStart)
@@ -428,7 +428,7 @@ fun TopBar(onBackButtonClick:() -> Unit, isDarkMode: Boolean){
                 contentDescription = "back_icon",
                 contentScale = ContentScale.Fit,
                 colorFilter = ColorFilter.tint(if (isDarkMode) bgColor else Color.White)
-            )
+            )*/
             Text(
                 text = stringResource(id = R.string.setting),
                 fontSize = 18.sp,

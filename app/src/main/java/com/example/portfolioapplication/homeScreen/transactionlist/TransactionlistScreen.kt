@@ -51,7 +51,8 @@ fun TransactionsScreenPreview(){
     TransactionListScreen(
         modifier = Modifier,
         state = remember { mutableStateOf(listOf()) },
-        onBackClicked = {}
+        onBackClicked = {},
+        isDarkMode = false
     )
 }
 
@@ -60,7 +61,8 @@ fun TransactionsScreenPreview(){
 fun TransactionListScreen(
     modifier: Modifier,
     state: State<List<ExpenseEntity>>,
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    isDarkMode: Boolean
 ) {
     var filterType by remember { mutableStateOf("All") }
     var dateRange by remember { mutableStateOf("All Time") }
@@ -78,7 +80,7 @@ fun TransactionListScreen(
 
     Scaffold(
         modifier = modifier,
-        containerColor = bgColor,
+        containerColor = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor,
         topBar = {
             Column (
                 modifier = Modifier
@@ -89,18 +91,18 @@ fun TransactionListScreen(
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp)
                 ) {
-                    Image(
+                    /*Image(
                         painter = painterResource(id = R.drawable.ic_back),
                         contentDescription = "Back",
                         modifier = Modifier
                             .align(Alignment.CenterStart)
                             .clickable { onBackClicked.invoke() },
                         colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
-                    )
+                    )*/
                     ExpenseTextView(
                         text = "Transactions",
                         fontSize = 18.sp,
-                        color = Color.White,
+                        color = if (isDarkMode) bgColor else Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .padding(16.dp)
@@ -112,7 +114,7 @@ fun TransactionListScreen(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .clickable { menuExpanded = !menuExpanded },
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(if (isDarkMode) bgColor else Color.White)
                     )
                     Spacer(modifier = modifier.padding(6.dp))
                 }

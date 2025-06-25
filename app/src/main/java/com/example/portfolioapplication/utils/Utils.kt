@@ -1,10 +1,15 @@
 package com.codewithfk.expensetracker.android.utils
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.portfolioapplication.R
 import com.example.todoroomdb.db.ExpenseEntity
 import java.text.NumberFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Date
 import java.util.Locale
 
@@ -72,6 +77,10 @@ object Utils {
             R.drawable.kite_logo
         } else if (item.title == "Coin") {
             R.drawable.coin_logo
+        } else if (item.title == "Spotify") {
+            R.drawable.ic_spotify
+        } else if (item.title == "Youtube") {
+            R.drawable.ic_youtube
         } else {
             R.drawable.bank_logo
         }

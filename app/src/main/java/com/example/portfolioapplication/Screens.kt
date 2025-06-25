@@ -11,6 +11,7 @@ sealed class Screens(val route: String) {
     object ForgotPasswordScreen : Screens("forgot_password_screen")
     object DashBoardScreen : Screens("dashboard_screen")
     object SettingScreen : Screens("setting_screen")
+    object ReportScreen : Screens("report_screen")
 
     // HomeScreen with parameter
     object HomeScreen : Screens("home_screen?showWelcomeMessage={showWelcomeMessage}") {
