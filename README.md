@@ -10,6 +10,12 @@ Trackerz helps enhance user engagement and simplifies the development process fo
 
 ---
 
+## 📱 App Screenshots
+
+![trackerz_screen_shot](https://github.com/user-attachments/assets/a811e2cc-127f-47c2-b445-26eae1d2dec1)
+
+---
+
 ## ✨ Why Trackerz?
 
 This project brings a polished user experience and technical excellence with the following core features:
@@ -31,13 +37,6 @@ This project brings a polished user experience and technical excellence with the
 
 - ✨ **Interactive UI**  
   Engaging design with subtle animations that boost user interaction.
-
----
-
-## 📱 App Screenshots
-
-![trackerz_screen_shot](https://github.com/user-attachments/assets/a811e2cc-127f-47c2-b445-26eae1d2dec1)
-
 
 ---
 
