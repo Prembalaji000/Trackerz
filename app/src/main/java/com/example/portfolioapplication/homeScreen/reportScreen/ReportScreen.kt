@@ -5,7 +5,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,11 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -57,8 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.codewithfk.expensetracker.android.utils.Utils
 import com.example.portfolioapplication.R
-import com.example.portfolioapplication.dashBoardScreen.TabItem
-import com.example.portfolioapplication.ui.theme.Grey30
 import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.todoroomdb.db.ExpenseEntity
@@ -72,14 +66,13 @@ fun ReportScreen(
     modifier: Modifier,
     expenses: List<ExpenseEntity>,
     isDarkMode: Boolean,
-    onBackButtonClick: () -> Unit
 ) {
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor,
         topBar = {
-            TopBar(onBackButtonClick = onBackButtonClick, isDarkMode = isDarkMode)
+            TopBar(isDarkMode = isDarkMode)
         },
         content = { paddingValue ->
             Box(
@@ -109,7 +102,7 @@ fun ReportScreen(
 }
 
 @Composable
-fun TopBar(onBackButtonClick: () -> Unit, isDarkMode: Boolean) {
+fun TopBar(isDarkMode: Boolean) {
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )
@@ -122,18 +115,6 @@ fun TopBar(onBackButtonClick: () -> Unit, isDarkMode: Boolean) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 18.dp)
         ) {
-            /*Image(
-                modifier = Modifier
-                    .size(32.dp)
-                    .align(Alignment.CenterStart)
-                    .clickable {
-                        onBackButtonClick()
-                    },
-                painter = painterResource(id = R.drawable.ic_back),
-                contentDescription = "back_icon",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(if (isDarkMode) bgColor else Color.White)
-            )*/
             Text(
                 text = "Reports",
                 fontSize = 18.sp,
@@ -202,7 +183,6 @@ fun ReportScreenPreview() {
             )
         ),
         isDarkMode = false,
-        onBackButtonClick = {}
     )
 }
 
@@ -371,6 +351,29 @@ fun CategoryPieChart(expenses: List<ExpenseEntity>) {
     }
 }
 
+@Composable
+fun TabItem(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isSelected) Color(0xFF242424) else Color.Transparent)
+            .clickable { onClick() }
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 14.sp,
+            color = if (isSelected) Color.White else Color.Gray,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
 
 fun getCategoryColor(type: String): Color {
     return when (type.lowercase()) {
@@ -394,7 +397,7 @@ fun PreviewScreen() {
     MonthSelector(
         selectedMonth = 6,
         selectedYear = 2025,
-        onMonthChanged = {_, _ ->},
+        onMonthChanged = { _, _ -> },
     )
 }
 
@@ -425,7 +428,11 @@ fun MonthSelector(
                 val newYear = if (selectedMonth == 0) selectedYear - 1 else selectedYear
                 onMonthChanged(newMonth, newYear)
             }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Previous Month", tint = Color.White)
+                Icon(
+                    Icons.Default.ArrowBack,
+                    contentDescription = "Previous Month",
+                    tint = Color.White
+                )
             }
 
             Text(
@@ -440,7 +447,11 @@ fun MonthSelector(
                 val newYear = if (selectedMonth == 11) selectedYear + 1 else selectedYear
                 onMonthChanged(newMonth, newYear)
             }) {
-                Icon(Icons.Default.ArrowForward, contentDescription = "Next Month", tint = Color.White)
+                Icon(
+                    Icons.Default.ArrowForward,
+                    contentDescription = "Next Month",
+                    tint = Color.White
+                )
             }
         }
     }

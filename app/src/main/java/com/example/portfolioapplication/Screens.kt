@@ -1,6 +1,5 @@
 package com.example.portfolioapplication
 
-import kotlinx.serialization.Serializable
 
 sealed class Screens(val route: String) {
     object SplashScreen : Screens("splash_screen")
@@ -9,16 +8,13 @@ sealed class Screens(val route: String) {
     object SignUpScreen : Screens("signup_screen")
     object LoginScreen : Screens("login_screen")
     object ForgotPasswordScreen : Screens("forgot_password_screen")
-    object DashBoardScreen : Screens("dashboard_screen")
     object SettingScreen : Screens("setting_screen")
     object ReportScreen : Screens("report_screen")
 
-    // HomeScreen with parameter
     object HomeScreen : Screens("home_screen?showWelcomeMessage={showWelcomeMessage}") {
         fun createRoute(showDialog: Boolean = false) =
             "home_screen?showWelcomeMessage=$showDialog"
     }
 
-    object AddExpenseScreen : Screens("add_expense_screen")
     object TransactionsScreen : Screens("transactions_screen")
 }

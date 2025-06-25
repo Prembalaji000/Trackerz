@@ -13,7 +13,11 @@ import com.example.portfolioapplication.Screens
 import com.example.portfolioapplication.loginScreen.sharedPreference
 
 @Composable
-fun ForgotPasswordScreenRouter(viewModel: ForgotPasswordViewModel, navController: NavController, modifier: Modifier){
+fun ForgotPasswordScreenRouter(
+    viewModel: ForgotPasswordViewModel,
+    navController: NavController,
+    modifier: Modifier
+) {
 
     val forgotPasswordState by viewModel.forgotPasswordState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -26,9 +30,16 @@ fun ForgotPasswordScreenRouter(viewModel: ForgotPasswordViewModel, navController
         isLoading = forgotPasswordState.isLoading,
         isVerify = isVerify,
         setVerifyDialogVisible = { isVerify = it },
-        onButtonClick = { viewModel.sendPasswordResetEmail(email = it, context = context, setVerifyDialogVisible = { isVerify = it } )},
-        onBackButtonClick = { navController.navigate(Screens.LoginScreen.route){
-            popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
-        } },
+        onButtonClick = {
+            viewModel.sendPasswordResetEmail(
+                email = it,
+                context = context,
+                setVerifyDialogVisible = { isVerify = it })
+        },
+        onBackButtonClick = {
+            navController.navigate(Screens.LoginScreen.route) {
+                popUpTo(navController.currentDestination?.id ?: 0) { inclusive = true }
+            }
+        },
     )
 }

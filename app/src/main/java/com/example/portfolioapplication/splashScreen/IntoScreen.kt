@@ -42,7 +42,10 @@ import com.example.portfolioapplication.ui.theme.bgColor
 @Preview
 @Composable
 fun PreviewTestScreen() {
-    WelcomeScreen(navController = NavController(LocalContext.current), preference = sharedPreference(context = LocalContext.current))
+    WelcomeScreen(
+        navController = NavController(LocalContext.current),
+        preference = sharedPreference(context = LocalContext.current)
+    )
 }
 
 @Composable
@@ -125,7 +128,7 @@ fun WelcomeScreen(
                 .clickable {
                     preference.setShowShowCase(true)
                     navController.navigate(Screens.AuthScreen.route) {
-                        popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+                        popUpTo(navController.currentDestination?.id ?: 0) { inclusive = true }
                     }
                 },
             contentAlignment = Alignment.Center

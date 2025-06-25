@@ -22,10 +22,10 @@ fun SettingRouter(
     viewModel: SettingViewModel,
     navController: NavController,
     modifier: Modifier,
-){
+) {
     val context = LocalContext.current
     val preference = sharedPreference(LocalContext.current)
-    val userEmail = preference.getUserEmailId()?:""
+    val userEmail = preference.getUserEmailId() ?: ""
     val userName by viewModel.userName.collectAsState()
     val userImageUrl by viewModel.userImage.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -33,36 +33,33 @@ fun SettingRouter(
 
     SettingScreen(
         modifier = modifier,
-        onBackButtonClick = {
-            navController.navigate(Screens.HomeScreen.route){
-                popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
-            }
-        },
         onSignOut = {
-            //preference.clearUserCredentials()
-            navController.navigate(Screens.LoginScreen.route){
-                popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+            navController.navigate(Screens.LoginScreen.route) {
+                popUpTo(navController.currentDestination?.id ?: 0) { inclusive = true }
             }
         },
         initialUserName = userName,
         userEmail = userEmail,
         userImageUrl = userImageUrl,
         addButtonClick = { name, uri ->
-            if (name.isNotEmpty()){
+            if (name.isNotEmpty()) {
                 preference.setUserName(name)
             }
-            if (uri != null){
+            if (uri != null) {
                 preference.setUserImageUrl(uri)
             }
-            if (name.isNotEmpty() || uri != null){
+            if (name.isNotEmpty() || uri != null) {
                 viewModel.refreshProfile(context)
             }
         },
         isRefresh = isRefreshing,
         isDarkMode = viewModel.isDarkMode.collectAsState().value,
         onThemeToggle = { viewModel.toggleTheme() },
-        onCloudBackUp = { viewModel.backupToCloud( isUploadSuccessful = { isSuccessfullyUpload = it } ) },
+        onCloudBackUp = {
+            viewModel.backupToCloud(isUploadSuccessful = {
+                isSuccessfullyUpload = it
+            })
+        },
         isUploadSuccess = isSuccessfullyUpload,
-        getData = { viewModel.syncFromCloudToRoom(context) }
     )
 }

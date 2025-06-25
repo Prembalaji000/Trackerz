@@ -1,15 +1,10 @@
 package com.codewithfk.expensetracker.android.utils
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.portfolioapplication.R
 import com.example.todoroomdb.db.ExpenseEntity
 import java.text.NumberFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
 import java.util.Date
 import java.util.Locale
 

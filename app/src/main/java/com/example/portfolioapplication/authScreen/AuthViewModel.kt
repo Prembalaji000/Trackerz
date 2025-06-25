@@ -46,7 +46,6 @@ class AuthViewModel() : ViewModel() {
     private val _authState = MutableStateFlow(AuthState())
     val authState = _authState.asStateFlow()
     private val _userDetail = MutableStateFlow<LoginCredential?>(null)
-    val userDetail = _userDetail.asStateFlow()
 
     fun setUserDetail(user: LoginCredential) {
         _userDetail.value = user
@@ -66,23 +65,28 @@ class AuthViewModel() : ViewModel() {
         scope.launch {
             try {
                 val result = credentialManager.getCredential(context = context, request = request)
-                when(result.credential){
+                when (result.credential) {
                     is CustomCredential -> {
                         _authState.update { it.copy(isLoading = true) }
-                        if (result.credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL){
-                            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
+                        if (result.credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                            val googleIdTokenCredential =
+                                GoogleIdTokenCredential.createFrom(result.credential.data)
                             val googleTokenId = googleIdTokenCredential.idToken
-                            val authCredential = GoogleAuthProvider.getCredential(googleTokenId,null)
-                            val user = Firebase.auth.signInWithCredential(authCredential).await().user
+                            val authCredential =
+                                GoogleAuthProvider.getCredential(googleTokenId, null)
+                            val user =
+                                Firebase.auth.signInWithCredential(authCredential).await().user
                             user?.let {
                                 if (!it.isAnonymous) {
-                                    setUserDetail(user = LoginCredential(
-                                        userName = user.displayName,
-                                        userEmail = user.email,
-                                        userImageUrl = user.photoUrl?.toString()
-                                    ))
-                                    preference.setUserName(user.displayName?:"")
-                                    preference.setUserEmailId(user.email?:"")
+                                    setUserDetail(
+                                        user = LoginCredential(
+                                            userName = user.displayName,
+                                            userEmail = user.email,
+                                            userImageUrl = user.photoUrl?.toString()
+                                        )
+                                    )
+                                    preference.setUserName(user.displayName ?: "")
+                                    preference.setUserEmailId(user.email ?: "")
                                     //preference.setUserImageUrl(user.photoUrl?.toString()?:"")
                                     viewModelScope.launch {
                                         delay(4000)
@@ -92,33 +96,36 @@ class AuthViewModel() : ViewModel() {
                                         onNavigate.navigate(
                                             Screens.HomeScreen.createRoute(showDialog = true)
                                         ) {
-                                            popUpTo(onNavigate.currentDestination?.id ?: 0) { inclusive = true }
+                                            popUpTo(
+                                                onNavigate.currentDestination?.id ?: 0
+                                            ) { inclusive = true }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+
                     else -> {
-                        Toast.makeText(context,"Something went wrong", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show()
                     }
                 }
-            } catch (e: NoCredentialException){
+            } catch (e: NoCredentialException) {
                 Log.e("GoogleSignIn", "No credential found $e")
                 launcher?.launch(getIntent())
-            } catch (e: GetCredentialException){
+            } catch (e: GetCredentialException) {
                 e.printStackTrace()
             }
         }
     }
 
-    fun navigateToLoginScreen(navController: NavController){
+    fun navigateToLoginScreen(navController: NavController) {
         _authState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             delay(1000)
             _authState.update { it.copy(isLoading = false) }
-            navController.navigate(Screens.LoginScreen.route){
-                popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+            navController.navigate(Screens.LoginScreen.route) {
+                popUpTo(navController.currentDestination?.id ?: 0) { inclusive = true }
             }
         }
     }
@@ -138,10 +145,17 @@ class AuthViewModel() : ViewModel() {
             .build()
     }
 
-    fun loginWithFacebook(context: Context, onNavigate: NavController, callbackManager: CallbackManager) {
+    fun loginWithFacebook(
+        context: Context,
+        onNavigate: NavController,
+        callbackManager: CallbackManager
+    ) {
         val preference = sharedPreference(context)
         val loginManager = LoginManager.getInstance()
-        loginManager.logInWithReadPermissions(context as Activity, listOf("email", "public_profile"))
+        loginManager.logInWithReadPermissions(
+            context as Activity,
+            listOf("email", "public_profile")
+        )
         loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
             override fun onSuccess(result: LoginResult) {
                 _authState.update { it.copy(isLoading = true) }
@@ -156,8 +170,8 @@ class AuthViewModel() : ViewModel() {
                                 val name = user?.displayName
                                 val email = user?.email
                                 val uid = user?.uid
-                                preference.setUserName(user?.displayName?:"")
-                                preference.setUserEmailId(user?.email?:"")
+                                preference.setUserName(user?.displayName ?: "")
+                                preference.setUserEmailId(user?.email ?: "")
                                 //preference.setUserImageUrl(user?.photoUrl?.toString()?:"")
                                 println("Firebase Auth Success: $name, $email, $uid")
                                 viewModelScope.launch {
@@ -166,7 +180,9 @@ class AuthViewModel() : ViewModel() {
                                     onNavigate.navigate(
                                         Screens.HomeScreen.createRoute(showDialog = true)
                                     ) {
-                                        popUpTo(onNavigate.currentDestination?.id ?: 0) { inclusive = true }
+                                        popUpTo(
+                                            onNavigate.currentDestination?.id ?: 0
+                                        ) { inclusive = true }
                                     }
                                 }
                             } else {
@@ -180,9 +196,11 @@ class AuthViewModel() : ViewModel() {
                 request.parameters = params
                 request.executeAsync()
             }
+
             override fun onCancel() {
                 println("Facebook login cancelled")
             }
+
             override fun onError(error: FacebookException) {
                 println("Facebook login error: ${error.message}")
             }
@@ -196,7 +214,7 @@ data class AuthState(
 
 
 data class LoginCredential(
-    var userName : String?,
-    var userEmail : String?,
-    var userImageUrl : String?
+    var userName: String?,
+    var userEmail: String?,
+    var userImageUrl: String?
 )

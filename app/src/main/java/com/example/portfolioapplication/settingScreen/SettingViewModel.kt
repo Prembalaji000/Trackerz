@@ -13,12 +13,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SettingViewModel(context: Context, private val expenseRepository: ExpenseRepository) : ViewModel() {
+class SettingViewModel(context: Context, private val expenseRepository: ExpenseRepository) :
+    ViewModel() {
     private val _settingState = MutableStateFlow(SettingState())
-    val settingState = _settingState.asStateFlow()
     val preference = sharedPreference(context)
 
     private val _userName = MutableStateFlow("")
@@ -90,7 +89,10 @@ class SettingViewModel(context: Context, private val expenseRepository: ExpenseR
     }
 
 
-    private fun fetchExpensesFromFireStore(context: Context, onResult: (List<ExpenseEntity>) -> Unit) {
+    private fun fetchExpensesFromFireStore(
+        context: Context,
+        onResult: (List<ExpenseEntity>) -> Unit
+    ) {
         _isRefreshing.value = true
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         viewModelScope.launch {
@@ -100,7 +102,7 @@ class SettingViewModel(context: Context, private val expenseRepository: ExpenseR
                 .collection("expenses")
                 .get()
                 .addOnSuccessListener { data ->
-                    if (data.isEmpty){
+                    if (data.isEmpty) {
                         _isRefreshing.value = false
                         Toast.makeText(context, "No Data Found", Toast.LENGTH_SHORT).show()
                         return@addOnSuccessListener

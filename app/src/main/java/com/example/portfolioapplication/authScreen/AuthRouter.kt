@@ -26,7 +26,7 @@ fun AuthScreenRouter(
     viewModel: AuthViewModel,
     navController: NavController,
     callbackManager: CallbackManager
-){
+) {
     val scope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
     val authState by viewModel.authState.collectAsStateWithLifecycle()

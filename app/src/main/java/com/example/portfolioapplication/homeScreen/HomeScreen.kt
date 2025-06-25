@@ -1,11 +1,9 @@
 package com.example.portfolioapplication.homeScreen
 
 import android.annotation.SuppressLint
-import android.provider.ContactsContract.Data
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,66 +18,50 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissValue
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedButton
-import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.rememberDismissState
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -93,16 +75,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -110,7 +88,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
@@ -133,29 +110,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.codewithfk.expensetracker.android.utils.Utils
-import com.example.portfolioapplication.R
-import com.example.portfolioapplication.ui.theme.Grey30
-import com.example.portfolioapplication.ui.theme.Red
-import com.example.portfolioapplication.ui.theme.Zinc
-import com.example.todoroomdb.db.ExpenseEntity
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.portfolioapplication.homeScreen.add_expense.DataForm
-import com.example.portfolioapplication.homeScreen.add_expense.ExpenseDatePickerDialog
-import com.example.portfolioapplication.homeScreen.add_expense.ExpenseDropDown
-import com.example.portfolioapplication.homeScreen.add_expense.TitleComponent
+import com.codewithfk.expensetracker.android.utils.Utils
+import com.example.portfolioapplication.R
 import com.example.portfolioapplication.showCase.IntroShowcase
 import com.example.portfolioapplication.showCase.IntroShowcaseScope
 import com.example.portfolioapplication.showCase.theme.component.ShowcaseStyle
 import com.example.portfolioapplication.showCase.theme.component.rememberIntroShowcaseState
 import com.example.portfolioapplication.signUpScreen.AnimatedLoader
-import com.example.portfolioapplication.ui.theme.Grey50
+import com.example.portfolioapplication.ui.theme.Grey30
+import com.example.portfolioapplication.ui.theme.Zinc
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.line
+import com.example.todoroomdb.db.ExpenseEntity
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -164,7 +133,7 @@ import kotlin.math.roundToInt
 
 @Preview
 @Composable
-fun HomeScreenPreview(){
+fun HomeScreenPreview() {
     HomeScreen(
         modifier = Modifier,
         userName = "Prem",
@@ -212,7 +181,7 @@ fun HomeScreen(
     hasData: Boolean,
     toShowDialog: Boolean,
     onDismissDialog: (Boolean) -> Unit,
-    onButtonClick:() -> Unit,
+    onButtonClick: () -> Unit,
     isLoading: Boolean,
     onReportClicked: () -> Unit
 ) {
@@ -253,7 +222,7 @@ fun HomeScreen(
 
     LaunchedEffect(sheetState) {
         scope.launch {
-            if (sheetState.isVisible){
+            if (sheetState.isVisible) {
                 sheetState.hide()
             }
         }
@@ -283,11 +252,12 @@ fun HomeScreen(
                     onCancelCLick = {
                         scope.launch {
                             sheetState.hide()
-                        } },
+                        }
+                    },
                     isIncome = isFromIncome
                 )
             }
-        ){
+        ) {
             AnimatedLoader(isLoading = isLoading)
             Surface(
                 modifier = modifier.fillMaxSize()
@@ -350,36 +320,38 @@ fun HomeScreen(
                         }
                         IconButton(
                             onClick = {},
-                            modifier = Modifier.introShowCaseTarget(
-                                index = 0,
-                                style = ShowcaseStyle.Default.copy(
-                                    backgroundColor = Color(0xFF9AD0EC), // specify color of background
-                                    backgroundAlpha = 0.98f, // specify transparency of background
-                                    targetCircleColor = White // specify color of target circle
-                                ),
-                                content = {
-                                    Column {
-                                        Image(
-                                            painterResource(id = R.drawable.search_example),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(100.dp)
-                                        )
+                            modifier = Modifier
+                                .introShowCaseTarget(
+                                    index = 0,
+                                    style = ShowcaseStyle.Default.copy(
+                                        backgroundColor = Color(0xFF9AD0EC), // specify color of background
+                                        backgroundAlpha = 0.98f, // specify transparency of background
+                                        targetCircleColor = White // specify color of target circle
+                                    ),
+                                    content = {
+                                        Column {
+                                            Image(
+                                                painterResource(id = R.drawable.search_example),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(100.dp)
+                                            )
 
-                                        androidx.compose.material.Text(
-                                            text = "Profile View!!",
-                                            color = Black,
-                                            fontSize = 24.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        androidx.compose.material.Text(
-                                            text = "You can view, upload data to cloud and edit your profile",
-                                            color = Black,
-                                            fontSize = 16.sp
-                                        )
+                                            androidx.compose.material.Text(
+                                                text = "Profile View!!",
+                                                color = Black,
+                                                fontSize = 24.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            androidx.compose.material.Text(
+                                                text = "You can view, upload data to cloud and edit your profile",
+                                                color = Black,
+                                                fontSize = 16.sp
+                                            )
+                                        }
                                     }
-                                }
-                           ).align(Alignment.CenterEnd)
-                        ){
+                                )
+                                .align(Alignment.CenterEnd)
+                        ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_profile_icon),
                                 contentScale = ContentScale.Fit,
@@ -458,7 +430,7 @@ fun HomeScreen(
                     }
                 }
             }
-            if (hasData && toShowDialog){
+            if (hasData && toShowDialog) {
                 StoreDataDialog(
                     onDismiss = { onDismissDialog(false) },
                     onButtonClick = onButtonClick
@@ -604,7 +576,9 @@ fun CardItem(
             Image(
                 painter = painterResource(id = R.drawable.dots_menu),
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterEnd).clickable { /*onReportClicked.invoke()*/ }
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .clickable { /*onReportClicked.invoke()*/ }
             )
         }
 
@@ -634,7 +608,6 @@ fun CardItem(
 }
 
 
-
 @Composable
 fun TransactionList(
     modifier: Modifier,
@@ -646,7 +619,7 @@ fun TransactionList(
 ) {
     val context = LocalContext.current
 
-    if (list.isEmpty()){
+    if (list.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxSize(),
@@ -685,14 +658,15 @@ fun TransactionList(
             Spacer(modifier = Modifier.size(6.dp))
         }
         LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
-            items(items = list,
+            items(
+                items = list,
                 key = { item -> item.id ?: 0 }) { item ->
                 Card(
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .fillMaxWidth()
-                ){
+                ) {
                     TransactionItemContent(
                         isDarkMode = isDarkMode,
                         expense = item,
@@ -700,8 +674,13 @@ fun TransactionList(
                         onExpanded = {},
                         onCollapsed = {},
                         onDeleteClick = {
-                            Toast.makeText(context, "Transaction Deleted Successfully", Toast.LENGTH_SHORT).show()
-                            onDeleteTransaction(item) },
+                            Toast.makeText(
+                                context,
+                                "Transaction Deleted Successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            onDeleteTransaction(item)
+                        },
                         onEditClick = {},
                         modifier = modifier,
                         title = item.title,
@@ -809,7 +788,6 @@ fun TransactionItemContent(
 }
 
 
-
 @Composable
 fun TransactionItemContents(expense: ExpenseEntity, removeOuterBorder: Boolean = false) {
     val icon = Utils.getItemIcon(expense)
@@ -885,7 +863,6 @@ fun TransactionItem(
 }
 
 
-
 @Composable
 fun CardRowItem(modifier: Modifier, title: String, amount: String, imaget: Int) {
     Column(modifier = modifier) {
@@ -949,7 +926,7 @@ fun ExpenseTextView(
 
 @Preview
 @Composable
-fun Preview(){
+fun Preview() {
     BottomSheet(
         onAddExpenseClick = {},
         onCancelCLick = {},
@@ -969,10 +946,6 @@ fun BottomSheet(
     val date = remember { mutableLongStateOf(0L) }
     val dateDialogVisibility = remember { mutableStateOf(false) }
     val type = rememberUpdatedState(if (isIncome) "Income" else "Expense")
-    val gradientBrush = Brush.verticalGradient(
-        colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
-    )
-    val scrollState = rememberScrollState()
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )
@@ -1008,7 +981,7 @@ fun BottomSheet(
             modifier = Modifier
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
-        ){
+        ) {
             Text(
                 text = if (isIncome) "Add Income" else "Add Expense",
                 color = White,
@@ -1023,19 +996,9 @@ fun BottomSheet(
             color = White,
             fontSize = 14.sp
         )
-       /* ExpenseDropDown(
-            listOfItems = if (isIncome) listOf(
-                "Paypal", "Salary", "Freelance", "Investments", "Bonus",
-                "Rental Income", "Other Income"
-            ) else listOf(
-                "Grocery", "Netflix", "Rent", "Paypal", "Starbucks", "Shopping", "Spotify", "Youtube",
-                "Transport", "Utilities", "Dining Out", "Entertainment", "Healthcare",
-                "Insurance", "Subscriptions", "Education", "Debt Payments",
-                "Gifts & Donations", "Travel", "Other Expenses", "Kite", "Coin"
-            ),
-            onItemSelected = { name.value = it }
-        )*/
-        ExposedDropdownMenuBox(expanded = expanded.value, onExpandedChange = { expanded.value = it }) {
+        ExposedDropdownMenuBox(
+            expanded = expanded.value,
+            onExpandedChange = { expanded.value = it }) {
             androidx.compose.material.OutlinedTextField(
                 value = selectedItem.value,
                 onValueChange = {},
@@ -1068,7 +1031,6 @@ fun BottomSheet(
                     )
                 },
                 trailingIcon = {
-                    //ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
                     androidx.compose.material.Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "Dropdown Arrow",
@@ -1104,7 +1066,8 @@ fun BottomSheet(
                     AnnotatedString("$${it.text}"),
                     object : OffsetMapping {
                         override fun originalToTransformed(offset: Int) = offset + 1
-                        override fun transformedToOriginal(offset: Int) = if (offset > 0) offset - 1 else 0
+                        override fun transformedToOriginal(offset: Int) =
+                            if (offset > 0) offset - 1 else 0
                     }
                 )
             },
@@ -1182,15 +1145,17 @@ fun BottomSheet(
         )
 
         Spacer(modifier = Modifier.height(18.dp))
-        Divider(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp), color = White)
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp), color = White
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
+        ) {
             OutlinedButton(
                 onClick = {
                     expanded.value = false
@@ -1220,24 +1185,34 @@ fun BottomSheet(
                     val model = ExpenseEntity(
                         id = null,
                         title = name.value,
-                        amount= amount.toDoubleOrNull() ?: 0.0,
+                        amount = amount.toDoubleOrNull() ?: 0.0,
                         date = Utils.formatDateToHumanReadableForm(date.longValue),
                         type = type.value,
                     )
-                    when{
+                    when {
                         model.title.isEmpty() -> {
-                            Toast.makeText(context, "Please enter a title", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please enter a title", Toast.LENGTH_SHORT)
+                                .show()
                         }
+
                         model.amount == 0.0 -> {
-                            Toast.makeText(context, "Please enter an amount", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please enter an amount", Toast.LENGTH_SHORT)
+                                .show()
                         }
+
                         model.date == "01/01/1970" -> {
-                            Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT)
+                                .show()
                         }
+
                         else -> {
                             expanded.value = false
                             onAddExpenseClick(model)
-                            Toast.makeText(context, "Expense added successfully", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Expense added successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             amount = ""
                             name.value = ""
                             date.longValue = 0
@@ -1273,7 +1248,25 @@ fun BottomSheet(
     }
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExpenseDatePickerDialog(
+    onDateSelected: (date: Long) -> Unit, onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+    val selectedDate = datePickerState.selectedDateMillis ?: 0L
+    DatePickerDialog(onDismissRequest = { onDismiss() }, confirmButton = {
+        TextButton(onClick = { onDateSelected(selectedDate) }) {
+            ExpenseTextView(text = "Confirm")
+        }
+    }, dismissButton = {
+        TextButton(onClick = { onDateSelected(selectedDate) }) {
+            ExpenseTextView(text = "Cancel")
+        }
+    }) {
+        DatePicker(state = datePickerState)
+    }
+}
 
 
 @Composable
@@ -1316,7 +1309,7 @@ fun SwipeableItemWithActions(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = isRevealed, contextMenuWidth) {
-        if(isRevealed) {
+        if (isRevealed) {
             offset.animateTo(contextMenuWidth)
         } else {
             offset.animateTo(0f)
@@ -1374,9 +1367,10 @@ fun SwipeableItemWithActions(
         }
     }
 }
+
 @Preview
 @Composable
-fun StoreDataDialogPreview(){
+fun StoreDataDialogPreview() {
     StoreDataDialog(onButtonClick = {}, onDismiss = {})
 }
 
@@ -1466,9 +1460,9 @@ fun StoreDataDialog(onDismiss: () -> Unit, onButtonClick: () -> Unit) {
 
 @Preview
 @Composable
-fun MonthTabPreview(){
+fun MonthTabPreview() {
     MonthTab(
-        onMonthChanged = {_, _ ->}
+        onMonthChanged = { _, _ -> }
     )
 }
 
@@ -1476,7 +1470,7 @@ fun MonthTabPreview(){
 @Composable
 fun MonthTab(
     onMonthChanged: (month: Int, year: Int) -> Unit
-){
+) {
     val months = listOf(
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -1495,7 +1489,7 @@ fun MonthTab(
             .background(Color(0xFF181818), shape = RoundedCornerShape(16.dp))
             .padding(vertical = 8.dp),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .wrapContentWidth(),

@@ -2,7 +2,6 @@ package com.example.portfolioapplication.homeScreen
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithfk.expensetracker.android.utils.Utils
 import com.example.portfolioapplication.dao.ExpenseDao
-import com.example.portfolioapplication.forgotPasswordScreen.ForgotPasswordState
 import com.example.portfolioapplication.loginScreen.sharedPreference
 import com.example.portfolioapplication.settingScreen.ExpenseRepository
 import com.example.todoroomdb.db.ExpenseEntity
@@ -23,18 +21,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HomeScreenViewModel(val dao: ExpenseDao, context: Context, private val expenseRepository: ExpenseRepository) : ViewModel() {
+class HomeScreenViewModel(
+    val dao: ExpenseDao,
+    context: Context,
+    private val expenseRepository: ExpenseRepository
+) : ViewModel() {
 
-    //val expenses = dao.getAllExpense()
     val preference = sharedPreference(context)
-    val userName = preference.getUserName()
-    val userImage = preference.getUserImageUrl()
     val showCase = preference.getShowCase()
 
     private val _HomeScreenState = MutableStateFlow(HomeScreenState())
@@ -55,11 +52,11 @@ class HomeScreenViewModel(val dao: ExpenseDao, context: Context, private val exp
             initialValue = emptyList()
         )
 
-    fun onShowCaseCompleted(isShowed: Boolean){
+    fun onShowCaseCompleted(isShowed: Boolean) {
         preference.setShowShowCase(isShowed)
     }
 
-    suspend fun deleteExpense(expenseEntity: ExpenseEntity){
+    suspend fun deleteExpense(expenseEntity: ExpenseEntity) {
         dao.deleteExpense(expenseEntity)
     }
 
@@ -75,27 +72,6 @@ class HomeScreenViewModel(val dao: ExpenseDao, context: Context, private val exp
         return Utils.formatCurrency(balance)
     }
 
-    fun getTotalExpense(list: List<ExpenseEntity>): String {
-        var total = 0.0
-        for (expense in list) {
-            if (expense.type != "Income") {
-                total += expense.amount
-            }
-        }
-
-        return Utils.formatCurrency(total)
-    }
-
-    fun getTotalIncome(list: List<ExpenseEntity>): String {
-        var totalIncome = 0.0
-        for (expense in list) {
-            if (expense.type == "Income") {
-                totalIncome += expense.amount
-            }
-        }
-        return Utils.formatCurrency(totalIncome)
-    }
-
     private fun fetchExpensesFromFireStore(context: Context) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         viewModelScope.launch {
@@ -105,7 +81,7 @@ class HomeScreenViewModel(val dao: ExpenseDao, context: Context, private val exp
                 .collection("expenses")
                 .get()
                 .addOnSuccessListener { snapshot ->
-                    if (snapshot.isEmpty){
+                    if (snapshot.isEmpty) {
                         _HomeScreenState.update { it.copy(isLoading = false) }
                         return@addOnSuccessListener
                     }

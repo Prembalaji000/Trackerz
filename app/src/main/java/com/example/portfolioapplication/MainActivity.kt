@@ -2,10 +2,6 @@ package com.example.portfolioapplication
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Matrix
-import android.media.ExifInterface
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -13,9 +9,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -31,22 +24,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.toRoute
 import com.codewithfk.expensetracker.android.feature.add_expense.AddExpenseViewModel
 import com.example.portfolioapplication.authScreen.AuthScreenRouter
 import com.example.portfolioapplication.authScreen.AuthViewModel
 import com.example.portfolioapplication.authScreen.AuthViewModelFactory
-import com.example.portfolioapplication.dashBoardScreen.DashBoardRouter
-import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModel
-import com.example.portfolioapplication.dashBoardScreen.DashBoardViewModelFactory
 import com.example.portfolioapplication.forgotPasswordScreen.ForgotPasswordScreenRouter
 import com.example.portfolioapplication.forgotPasswordScreen.ForgotPasswordViewModel
 import com.example.portfolioapplication.forgotPasswordScreen.ForgotPasswordViewModelFactory
 import com.example.portfolioapplication.homeScreen.HomeScreenRouter
 import com.example.portfolioapplication.homeScreen.HomeScreenViewModel
 import com.example.portfolioapplication.homeScreen.HomeScreenViewModelFactor
-import com.example.portfolioapplication.homeScreen.add_expense.AddExpenseScreenRouter
-import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreen
 import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreenRouter
 import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreenViewModelFactory
 import com.example.portfolioapplication.homeScreen.reportScreen.ReportViewModel
@@ -110,11 +97,11 @@ class MainActivity : ComponentActivity() {
         callbackManager.onActivityResult(requestCode, resultCode, data)
     }
 
-     override fun onStart() {
+    override fun onStart() {
         super.onStart()
-         val user = auth.currentUser
-         user?.email
-         println("login : ${user?.email}")
+        val user = auth.currentUser
+        user?.email
+        println("login : ${user?.email}")
         println("successful started")
     }
 }
@@ -126,7 +113,7 @@ fun Navigation(
     modifier: Modifier = Modifier,
     callbackManager: CallbackManager,
     preference: sharedPreference
-){
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -136,7 +123,7 @@ fun Navigation(
     ) {
         composable(
             route = Screens.SplashScreen.route,
-        ){
+        ) {
             SplashScreen(
                 modifier = modifier,
                 navController = navController,
@@ -145,7 +132,7 @@ fun Navigation(
         }
         composable(
             route = Screens.WelcomeScreen.route,
-        ){
+        ) {
             WelcomeScreen(
                 modifier = modifier,
                 navController = navController,
@@ -154,7 +141,7 @@ fun Navigation(
         }
         composable(
             route = Screens.AuthScreen.route,
-        ){
+        ) {
             val viewModel: AuthViewModel = viewModel(
                 factory = AuthViewModelFactory()
             )
@@ -168,8 +155,8 @@ fun Navigation(
         }
         composable(
             route = Screens.SignUpScreen.route,
-        ){
-            val viewModel : SignUpViewModel = viewModel(
+        ) {
+            val viewModel: SignUpViewModel = viewModel(
                 factory = SignUpViewModelFactory()
             )
             SignUpRouter(
@@ -181,7 +168,7 @@ fun Navigation(
         }
         composable(
             route = Screens.LoginScreen.route,
-        ){
+        ) {
             val loginViewModel: LoginViewModel = viewModel(
                 factory = LoginViewModelFactory(context)
             )
@@ -194,8 +181,8 @@ fun Navigation(
         }
         composable(
             route = Screens.ForgotPasswordScreen.route,
-        ){
-            val viewModel : ForgotPasswordViewModel = viewModel(
+        ) {
+            val viewModel: ForgotPasswordViewModel = viewModel(
                 factory = ForgotPasswordViewModelFactory()
             )
             ForgotPasswordScreenRouter(
@@ -206,7 +193,7 @@ fun Navigation(
         }
         composable(
             route = Screens.TransactionsScreen.route,
-        ){
+        ) {
             val expenseDao = MainApplication.expenseData.expenseDao()
             val repo = ExpenseRepository(expenseDao = expenseDao)
             val viewModel = HomeScreenViewModel(dao = expenseDao, context, repo)
@@ -218,7 +205,7 @@ fun Navigation(
         }
         composable(
             route = Screens.SettingScreen.route,
-        ){
+        ) {
             val expenseDao = MainApplication.expenseData.expenseDao()
             val repo = ExpenseRepository(expenseDao = expenseDao)
             val viewModel: SettingViewModel = viewModel(
@@ -238,11 +225,12 @@ fun Navigation(
                     defaultValue = false
                 }
             )
-        ){ backStackEntry ->
-            val showWelcomeMessage = backStackEntry.arguments?.getBoolean("showWelcomeMessage") ?: false
+        ) { backStackEntry ->
+            val showWelcomeMessage =
+                backStackEntry.arguments?.getBoolean("showWelcomeMessage") ?: false
             val expenseDao = MainApplication.expenseData.expenseDao()
             val repo = ExpenseRepository(expenseDao = expenseDao)
-            val viewModel : HomeScreenViewModel = viewModel(
+            val viewModel: HomeScreenViewModel = viewModel(
                 factory = HomeScreenViewModelFactor(repo, expenseDao, context)
             )
             val settingViewModel: SettingViewModel = viewModel(
@@ -254,143 +242,21 @@ fun Navigation(
                 expenseViewModel = expenseViewModel,
                 settingViewModel = settingViewModel,
                 isShowDialog = showWelcomeMessage,
-                modifier = modifier,
                 navController = navController
             )
         }
         composable(
             route = Screens.ReportScreen.route,
-        ){
+        ) {
             val expenseDao = MainApplication.expenseData.expenseDao()
-            val viewModel : ReportViewModel = viewModel(
+            val viewModel: ReportViewModel = viewModel(
                 factory = ReportScreenViewModelFactory(expenseDao)
             )
             ReportScreenRouter(
                 modifier = modifier,
                 viewModel = viewModel,
-                navController = navController
             )
         }
-
-
-        /*composable<Screens.SplashScreen>{
-            SplashScreen(
-                modifier = modifier,
-                navController = navController,
-                preference = preference
-            )
-        }
-        composable<Screens.AuthScreen>(
-            enterTransition = { fadeIn(animationSpec = tween(700)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ){
-            val viewModel: AuthViewModel = viewModel(
-                factory = AuthViewModelFactory()
-            )
-            AuthScreenRouter(
-                viewModel = viewModel,
-                context = context,
-                modifier = modifier,
-                callbackManager = callbackManager,
-                navController = navController
-            )
-        }
-        composable<Screens.LoginScreen>(
-            enterTransition = { fadeIn(animationSpec = tween(700)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ){
-            val loginViewModel: LoginViewModel = viewModel(
-                factory = LoginViewModelFactory(context)
-            )
-            LoginRouter(
-                viewModel = loginViewModel,
-                modifier = modifier,
-                navController = navController,
-                context = context
-            )
-        }
-
-        composable<Screens.SignUpScreen>(
-            enterTransition = { fadeIn(animationSpec = tween(700)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ){
-            val viewModel : SignUpViewModel = viewModel(
-                factory = SignUpViewModelFactory()
-            )
-            SignUpRouter(
-                modifier = modifier,
-                viewModel = viewModel,
-                context = context,
-                navController = navController
-            )
-        }
-        composable<Screens.DashBoardScreen> {
-            val todoDao = MainApplication.todoDatabase.getTodoDao()
-            val viewModel: DashBoardViewModel = viewModel(
-                factory = DashBoardViewModelFactory(todoDao, context)
-            )
-            DashBoardRouter(
-                viewModel = viewModel,
-                modifier = modifier,
-                navController = navController
-            )
-        }
-        composable<Screens.SettingScreen>(
-            enterTransition = { fadeIn(animationSpec = tween(700)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ){
-            val expenseDao = MainApplication.expenseData.expenseDao()
-            val repo = ExpenseRepository(expenseDao = expenseDao)
-            val viewModel: SettingViewModel = viewModel(
-                factory = SettingViewModelFactory(repo, context)
-            )
-            SettingRouter(
-                viewModel = viewModel,
-                modifier = modifier,
-                navController = navController
-            )
-        }
-
-        composable<Screens.HomeScreen>(
-            enterTransition = { fadeIn(animationSpec = tween(700)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ) { backStackEntry ->
-            val homeScreen = backStackEntry.toRoute<Screens.HomeScreen>()
-            val expenseDao = MainApplication.expenseData.expenseDao()
-            val repo = ExpenseRepository(expenseDao = expenseDao)
-            val viewModel : HomeScreenViewModel = viewModel(
-                factory = HomeScreenViewModelFactor(repo, expenseDao, context)
-            )
-            val expenseViewModel = AddExpenseViewModel(dao = expenseDao)
-            HomeScreenRouter(
-                viewModel = viewModel,
-                expenseViewModel = expenseViewModel,
-                isShowDialog = homeScreen.showDialog,
-                modifier = modifier,
-                navController = navController
-            )
-        }
-        composable<Screens.AddExpenseScreen>(
-            enterTransition = { fadeIn(animationSpec = tween(700)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ) {
-            val expenseDao = MainApplication.expenseData.expenseDao()
-            val viewModel = AddExpenseViewModel(dao = expenseDao)
-            AddExpenseScreenRouter(modifier = modifier, viewModel = viewModel)
-        }
-        composable<Screens.TransactionsScreen>(
-            enterTransition = { fadeIn(animationSpec = tween(700)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
-        ) {
-            val expenseDao = MainApplication.expenseData.expenseDao()
-            val repo = ExpenseRepository(expenseDao = expenseDao)
-            val viewModel = HomeScreenViewModel(dao = expenseDao, context, repo)
-            TransactionListScreenRouter(
-                modifier = modifier,
-                viewModel = viewModel,
-                navController = navController
-            )
-        }*/
     }
 }
 
@@ -408,30 +274,6 @@ fun SetStatusBarColor(context: Context) {
     }
 }
 
-
-
-fun Context.fixImageRotation(uri: Uri, bitmap: Bitmap): Bitmap {
-    contentResolver.openInputStream(uri)?.use { inputStream ->
-        val exif = ExifInterface(inputStream)
-        val orientation = exif.getAttributeInt(
-            ExifInterface.TAG_ORIENTATION,
-            ExifInterface.ORIENTATION_NORMAL
-        )
-
-        val rotationDegrees = when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> 90f
-            ExifInterface.ORIENTATION_ROTATE_180 -> 180f
-            ExifInterface.ORIENTATION_ROTATE_270 -> 270f
-            else -> 0f
-        }
-
-        if (rotationDegrees == 0f) return bitmap
-
-        val matrix = Matrix().apply { postRotate(rotationDegrees) }
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
-    return bitmap
-}
 
 fun String?.capitalizeFirstLetter(): String {
     return if (TextUtils.isEmpty(this)) {

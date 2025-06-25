@@ -26,7 +26,7 @@ class LoginViewModel(context: Context, private val preference: sharedPreference)
 
     fun loginUser(email: String, password: String, navController: NavController, context: Context) {
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(context,"Email and password cannot be empty",Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Email and password cannot be empty", Toast.LENGTH_LONG).show()
             return
         }
         _loginState.update { it.copy(isLoading = true) }
@@ -36,7 +36,7 @@ class LoginViewModel(context: Context, private val preference: sharedPreference)
                     val name = email.substringBefore("@")
                     preference.setUserName(name)
                     preference.setUserEmailId(email)
-                    if (isAddedRememberMe){
+                    if (isAddedRememberMe) {
                         preference.setEmail(email)
                         preference.setPassword(password)
                         preference.setCheckRememberMe(isAddedRememberMe)
