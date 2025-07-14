@@ -18,20 +18,25 @@ fun SignUpRouter(
     viewModel: SignUpViewModel,
     navController: NavController,
     context: Context
-){
+) {
     val loginState by viewModel.loginState.collectAsStateWithLifecycle()
     val preference = sharedPreference(context)
 
     SignUpScreen(
         modifier = modifier,
         onButtonClick = { email, password ->
-            viewModel.signUpWithEmail(email = email, password = password, navController = navController, context = context)
+            viewModel.signUpWithEmail(
+                email = email,
+                password = password,
+                navController = navController,
+                context = context
+            )
         },
         isLoading = loginState.isLoading,
         isDarkMode = preference.isDarkModeEnabled(),
         onClickSocials = {
-            navController.navigate(Screens.AuthScreen.route){
-                popUpTo(navController.currentDestination?.id?:0) { inclusive = true }
+            navController.navigate(Screens.AuthScreen.route) {
+                popUpTo(navController.currentDestination?.id ?: 0) { inclusive = true }
             }
         }
     )

@@ -15,11 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.signUpScreen.AnimatedLoader
-import com.example.portfolioapplication.signUpScreen.SignInButton
 import com.example.portfolioapplication.signUpScreen.TextField
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.line
@@ -52,8 +48,17 @@ import com.example.portfolioapplication.ui.theme.line
 
 @Preview
 @Composable
-fun LoginPreview(){
-    LoginScreen(modifier = Modifier, onButtonClick = {}, onLoginClick = {_,_ ->}, isAddedRememberMe = true, onAddedRememberMe = {  }, onForgotPasswordClick = {}, isLoading = false, isDarkMode = false)
+fun LoginPreview() {
+    LoginScreen(
+        modifier = Modifier,
+        onButtonClick = {},
+        onLoginClick = { _, _ -> },
+        isAddedRememberMe = true,
+        onAddedRememberMe = { },
+        onForgotPasswordClick = {},
+        isLoading = false,
+        isDarkMode = false
+    )
 }
 
 @Composable
@@ -63,17 +68,20 @@ fun LoginScreen(
     onButtonClick: () -> Unit,
     onAddedRememberMe: (Boolean) -> Unit,
     onForgotPasswordClick: () -> Unit,
-    isAddedRememberMe :Boolean,
-    isLoading : Boolean,
-    isDarkMode : Boolean
-    ){
+    isAddedRememberMe: Boolean,
+    isLoading: Boolean,
+    isDarkMode: Boolean
+) {
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )
     val context = LocalContext.current
-    var email by remember { mutableStateOf(sharedPreference(context).getEmail()?: "") }
-    var password by remember { mutableStateOf(sharedPreference(context).getPassword()?: "") }
-    val isEmailValid = email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.isEmpty() || email.endsWith(" ")
+    var email by remember { mutableStateOf(sharedPreference(context).getEmail() ?: "") }
+    var password by remember { mutableStateOf(sharedPreference(context).getPassword() ?: "") }
+    val isEmailValid =
+        email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.isEmpty() || email.endsWith(
+            " "
+        )
     val isPasswordValid = password.length >= 6 || password.isEmpty()
 
     Column(
@@ -163,11 +171,9 @@ fun RememberMeForgotPasswordRow(
     modifier: Modifier = Modifier,
     onForgotPasswordClick: () -> Unit,
     onAddedRememberMe: (Boolean) -> Unit,
-    isAddedRememberMe :Boolean,
-    isDarkMode : Boolean
+    isAddedRememberMe: Boolean,
+    isDarkMode: Boolean
 ) {
-    var rememberMeChecked by remember { mutableStateOf(false) }
-
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -208,12 +214,9 @@ fun RememberMeForgotPasswordRow(
 
 @Composable
 fun LoginButton(
-    text : String,
+    text: String,
     onLoginClick: () -> Unit
-){
-    val gradientBrush = Brush.verticalGradient(
-        colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
-    )
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -246,7 +249,7 @@ fun SignUpButton(
     text: String,
     onButtonClick: () -> Unit,
     isDarkMode: Boolean
-){
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

@@ -2,9 +2,6 @@ package com.example.portfolioapplication.forgotPasswordScreen
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -14,15 +11,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ForgotPasswordViewModel: ViewModel() {
+class ForgotPasswordViewModel : ViewModel() {
 
     private val _forgotPasswordState = MutableStateFlow(ForgotPasswordState())
     val forgotPasswordState = _forgotPasswordState.asStateFlow()
 
-    fun sendPasswordResetEmail(context: Context, email: String, setVerifyDialogVisible: (Boolean) -> Unit,) {
+    fun sendPasswordResetEmail(
+        context: Context,
+        email: String,
+        setVerifyDialogVisible: (Boolean) -> Unit,
+    ) {
         isValidEmail(email = email)
         if (email.isEmpty()) {
-            Toast.makeText(context,"Please Enter Email",Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Please Enter Email", Toast.LENGTH_LONG).show()
             return
         }
         _forgotPasswordState.update { it.copy(isLoading = true) }
@@ -36,7 +37,8 @@ class ForgotPasswordViewModel: ViewModel() {
                         _forgotPasswordState.update { it.copy(isLoading = false) }
                     }
                 } else {
-                    Toast.makeText(context, task.exception?.message ?: "Error", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, task.exception?.message ?: "Error", Toast.LENGTH_LONG)
+                        .show()
                     _forgotPasswordState.update { it.copy(isLoading = false) }
                 }
             }

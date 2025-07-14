@@ -1,24 +1,20 @@
 package com.example.portfolioapplication.homeScreen
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,49 +24,40 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -78,10 +65,9 @@ import com.codewithfk.expensetracker.android.feature.transactionlist.Transaction
 import com.codewithfk.expensetracker.android.utils.Utils
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreen
-import com.example.portfolioapplication.homeScreen.reportScreen.ReportScreenRouter
+import com.example.portfolioapplication.settingScreen.SettingScreen
 import com.example.portfolioapplication.showCase.IntroShowcase
 import com.example.portfolioapplication.showCase.theme.component.ShowcaseStyle
-import com.example.portfolioapplication.showCase.theme.component.introShowcaseTarget
 import com.example.portfolioapplication.showCase.theme.component.rememberIntroShowcaseState
 import com.example.portfolioapplication.signUpScreen.AnimatedLoader
 import com.example.portfolioapplication.ui.theme.Grey30
@@ -92,16 +78,11 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import androidx.compose.runtime.State
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.res.vectorResource
-import com.example.portfolioapplication.settingScreen.SettingScreen
 
 @Preview
 @Composable
 fun HomeScreenRevampPreview() {
     HomeScreenRevamp(
-        modifier = Modifier,
         userName = "Prem",
         userImageUrl = "",
         userEmail = "",
@@ -109,7 +90,6 @@ fun HomeScreenRevampPreview() {
         expenseList = listOf(),
         onDeleteTransaction = {},
         onAddExpenseClick = {},
-        settingButton = {},
         toShowCase = false,
         onShowCaseCompleted = {},
         hasData = false,
@@ -121,12 +101,11 @@ fun HomeScreenRevampPreview() {
         onReportClicked = {},
         state = remember { mutableStateOf(listOf()) },
         onSignOut = {},
-        onAddButtonClick = {_, _ ->},
+        onAddButtonClick = { _, _ -> },
         isDarkMode = true,
         onThemeToggle = {},
         onCloudBackUp = {},
         isUploadSuccess = false,
-        getData = {}
     )
 }
 
@@ -134,10 +113,8 @@ fun HomeScreenRevampPreview() {
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun HomeScreenRevamp(
-    modifier: Modifier,
     onReportClicked: () -> Unit,
     onSeeAllClicked: () -> Unit,
-    settingButton: () -> Unit,
     userName: String,
     userEmail: String,
     userImageUrl: String,
@@ -149,7 +126,7 @@ fun HomeScreenRevamp(
     hasData: Boolean,
     toShowDialog: Boolean,
     onDismissDialog: (Boolean) -> Unit,
-    onButtonClick:() -> Unit,
+    onButtonClick: () -> Unit,
     isLoading: Boolean,
     state: State<List<ExpenseEntity>>,
     onSignOut: () -> Unit,
@@ -159,7 +136,6 @@ fun HomeScreenRevamp(
     onThemeToggle: () -> Unit,
     onCloudBackUp: () -> Unit,
     isUploadSuccess: Boolean,
-    getData: () -> Unit
 ) {
     val navItems = listOf("Home", "Report", "Add", "SeeAll", "Settings")
     var selectedIndex by remember { mutableStateOf(0) }
@@ -204,7 +180,7 @@ fun HomeScreenRevamp(
 
     LaunchedEffect(sheetState) {
         scope.launch {
-            if (sheetState.isVisible){
+            if (sheetState.isVisible) {
                 sheetState.hide()
             }
         }
@@ -218,7 +194,7 @@ fun HomeScreenRevamp(
             showAppIntro = false
         },
         state = introShowcaseState,
-    ){
+    ) {
         ModalBottomSheetLayout(
             sheetState = addSheetState,
             sheetBackgroundColor = bgColor,
@@ -260,11 +236,12 @@ fun HomeScreenRevamp(
                         onCancelCLick = {
                             scope.launch {
                                 sheetState.hide()
-                            } },
+                            }
+                        },
                         isIncome = isFromIncome
                     )
                 }
-            ){
+            ) {
                 AnimatedLoader(isLoading = isLoading)
                 Scaffold(
                     bottomBar = {
@@ -290,7 +267,7 @@ fun HomeScreenRevamp(
                                         }
                                     },
                                     icon = {
-                                        when(item){
+                                        when (item) {
                                             "Home" -> {
                                                 Icon(
                                                     modifier = Modifier.introShowCaseTarget(
@@ -328,6 +305,7 @@ fun HomeScreenRevamp(
                                                     tint = if (selectedIndex == index) White else Color.Gray
                                                 )
                                             }
+
                                             "Report" -> {
                                                 Icon(
                                                     modifier = Modifier.introShowCaseTarget(
@@ -365,6 +343,7 @@ fun HomeScreenRevamp(
                                                     tint = if (selectedIndex == index) White else Color.Gray
                                                 )
                                             }
+
                                             "Add" -> {
                                                 Box(
                                                     modifier = Modifier
@@ -435,6 +414,7 @@ fun HomeScreenRevamp(
                                                     }
                                                 }
                                             }
+
                                             "SeeAll" -> {
                                                 Icon(
                                                     modifier = Modifier.introShowCaseTarget(
@@ -472,6 +452,7 @@ fun HomeScreenRevamp(
                                                     tint = if (selectedIndex == index) White else Color.Gray
                                                 )
                                             }
+
                                             "Settings" -> {
                                                 Icon(
                                                     modifier = Modifier.introShowCaseTarget(
@@ -524,7 +505,10 @@ fun HomeScreenRevamp(
                     Surface(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(bottom = paddingValues.calculateBottomPadding(), top = paddingValues.calculateTopPadding())
+                            .padding(
+                                bottom = paddingValues.calculateBottomPadding(),
+                                top = paddingValues.calculateTopPadding()
+                            )
                     ) {
                         when (selectedIndex) {
                             0 -> {
@@ -535,31 +519,30 @@ fun HomeScreenRevamp(
                                     onDeleteTransaction = onDeleteTransaction,
                                     onReportClicked = onReportClicked,
                                     onSeeAllClicked = onSeeAllClicked,
-                                    settingButton = settingButton,
                                     isDarkMode = isDarkMode
                                 )
                             }
+
                             1 -> {
                                 ReportScreen(
                                     modifier = Modifier,
                                     isDarkMode = isDarkMode,
                                     expenses = expenseList,
-                                    onBackButtonClick = { }
                                 )
                             }
+
                             2 -> {}
                             3 -> {
                                 TransactionListScreen(
                                     modifier = Modifier,
                                     state = state,
-                                    onBackClicked = { },
                                     isDarkMode = isDarkMode
                                 )
                             }
+
                             4 -> {
                                 SettingScreen(
                                     modifier = Modifier,
-                                    onBackButtonClick = { },
                                     onSignOut = onSignOut,
                                     initialUserName = userName,
                                     userEmail = userEmail,
@@ -570,12 +553,11 @@ fun HomeScreenRevamp(
                                     onThemeToggle = onThemeToggle,
                                     onCloudBackUp = onCloudBackUp,
                                     isUploadSuccess = isUploadSuccess,
-                                    getData = getData
                                 )
                             }
                         }
                     }
-                    if (hasData && toShowDialog){
+                    if (hasData && toShowDialog) {
                         StoreDataDialog(
                             onDismiss = { onDismissDialog(false) },
                             onButtonClick = onButtonClick
@@ -596,9 +578,8 @@ fun RevampHomeScreen(
     onDeleteTransaction: (ExpenseEntity) -> Unit,
     onReportClicked: () -> Unit,
     onSeeAllClicked: () -> Unit,
-    settingButton: () -> Unit,
     isDarkMode: Boolean
-){
+) {
     val context = LocalContext.current
     val imageLoader = ImageLoader(context)
     val greeting = remember {
@@ -732,7 +713,7 @@ fun RevampHomeScreen(
 
 @Preview
 @Composable
-fun Previews(){
+fun Previews() {
     ChooseCategoryBottomSheet(
         onAddExpenseClicked = {},
         onAddIncomeClicked = {}
@@ -759,7 +740,7 @@ fun ChooseCategoryBottomSheet(
             modifier = Modifier
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
-        ){
+        ) {
             androidx.compose.material3.Text(
                 text = "Choose Category",
                 color = White,

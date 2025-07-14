@@ -8,20 +8,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -36,7 +30,6 @@ import androidx.navigation.NavController
 import com.example.portfolioapplication.R
 import com.example.portfolioapplication.Screens
 import com.example.portfolioapplication.loginScreen.sharedPreference
-import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import kotlinx.coroutines.delay
 
@@ -44,7 +37,10 @@ import kotlinx.coroutines.delay
 @Preview
 @Composable
 fun SplashScreenPreview() {
-    SplashScreen(navController = NavController(LocalContext.current), preference = sharedPreference(context = LocalContext.current))
+    SplashScreen(
+        navController = NavController(LocalContext.current),
+        preference = sharedPreference(context = LocalContext.current)
+    )
 }
 
 @Composable
@@ -59,9 +55,9 @@ fun SplashScreen(
     val isDarkMode = preference.isDarkModeEnabled()
     LaunchedEffect(Unit) {
         delay(6000)
-        if (preference.getCheckRememberMe()){
-            navController.navigate(Screens.HomeScreen.route){
-                popUpTo(Screens.SplashScreen.route) { inclusive = true  }
+        if (preference.getCheckRememberMe()) {
+            navController.navigate(Screens.HomeScreen.route) {
+                popUpTo(Screens.SplashScreen.route) { inclusive = true }
             }
         } else {
             navController.navigate(Screens.WelcomeScreen.route) {
@@ -98,13 +94,5 @@ fun SplashScreen(
                 fontSize = 28.sp,
             )
         }
-     /*   Spacer(modifier = Modifier.padding(4.dp))
-        LinearProgressIndicator(
-            modifier = Modifier
-                .height(2.dp)
-                .padding(horizontal = 12.dp),
-            color = if (isDarkMode) bgColor else Color.White,
-            trackColor = Color.Transparent,
-        )*/
     }
 }

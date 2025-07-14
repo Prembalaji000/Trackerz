@@ -83,8 +83,14 @@ import com.example.portfolioapplication.ui.theme.redAccent100
 
 @Preview
 @Composable
-fun SignUpScreePreview(){
-    SignUpScreen(modifier = Modifier, onButtonClick = {_, _ ->}, onClickSocials = {}, isLoading = true, isDarkMode = false)
+fun SignUpScreePreview() {
+    SignUpScreen(
+        modifier = Modifier,
+        onButtonClick = { _, _ -> },
+        onClickSocials = {},
+        isLoading = true,
+        isDarkMode = false
+    )
 }
 
 
@@ -94,20 +100,23 @@ fun SignUpScreen(
     onButtonClick: (String, String) -> Unit,
     onClickSocials: () -> Unit,
     isLoading: Boolean,
-    isDarkMode : Boolean
-    ){
+    isDarkMode: Boolean
+) {
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val isEmailValid = email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.endsWith(" ") || email.isEmpty()
+    val isEmailValid =
+        email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.endsWith(
+            " "
+        ) || email.isEmpty()
     val isPasswordValid = password.length >= 6 || password.isEmpty()
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color =  if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor)
+            .background(color = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor)
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -188,7 +197,7 @@ fun SignUpScreen(
 
 @Preview
 @Composable
-fun PreviewScreen(){
+fun PreviewScreen() {
     PasswordStrengthBar(password = "prembalaji")
 }
 
@@ -196,13 +205,13 @@ fun PreviewScreen(){
 @Composable
 fun TextField(
     modifier: Modifier,
-    email : String,
+    email: String,
     password: String,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    isEmailValid : Boolean,
-    isPasswordValid : Boolean,
-){
+    isEmailValid: Boolean,
+    isPasswordValid: Boolean,
+) {
     val emailInteractionSource = remember { MutableInteractionSource() }
     val passwordInteractionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
@@ -267,7 +276,10 @@ fun TextField(
                 unfocusedContainerColor = DarkBlue96,
                 errorContainerColor = Color.White,
                 cursorColor = Color.Black,
-                selectionColors = TextSelectionColors(handleColor = Grey50, backgroundColor = darkBlue)
+                selectionColors = TextSelectionColors(
+                    handleColor = Grey50,
+                    backgroundColor = darkBlue
+                )
             ),
             shape = RoundedCornerShape(10.dp),
             textStyle = TextStyle(
@@ -379,7 +391,10 @@ fun TextField(
                 unfocusedContainerColor = DarkBlue96,
                 errorContainerColor = Color.White,
                 cursorColor = Color.Black,
-                selectionColors = TextSelectionColors(handleColor = Grey50, backgroundColor = darkBlue)
+                selectionColors = TextSelectionColors(
+                    handleColor = Grey50,
+                    backgroundColor = darkBlue
+                )
             ),
             shape = RoundedCornerShape(10.dp),
             textStyle = TextStyle(
@@ -418,7 +433,7 @@ fun TextField(
 
 
 @Composable
-fun StartButton(text : String, isDarkMode: Boolean, onClickSocials: () -> Unit){
+fun StartButton(text: String, isDarkMode: Boolean, onClickSocials: () -> Unit) {
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
     )
@@ -454,7 +469,7 @@ fun SignInButton(
     text: String,
     onButtonClick: () -> Unit,
     isDarkMode: Boolean
-    ){
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -487,11 +502,11 @@ fun SignInButton(
 fun PasswordStrengthBar(password: String) {
     val strength = calculatePasswordStrength(password)
     val segmentColors = listOf(
-        Color(0xFFD3D3D3), // Light Gray - No strength
-        Color(0xFFFFC1C1), // Light Red - Weak
-        Color(0xFFFFE5A1), // Light Yellow - Medium
-        Color(0xFFB0F2B6), // Light Green - Strong
-        Color(0xFFADD8E6)  // Light Blue - Very Strong
+        Color(0xFFD3D3D3),
+        Color(0xFFFFC1C1),
+        Color(0xFFFFE5A1),
+        Color(0xFFB0F2B6),
+        Color(0xFFADD8E6)
     )
 
     Column(
@@ -504,55 +519,40 @@ fun PasswordStrengthBar(password: String) {
                 .fillMaxWidth()
                 .height(8.dp)
                 .padding(horizontal = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween // Spacing between bars
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Create 4 bars and color them based on strength
             for (i in 0 until 4) {
                 Box(
                     modifier = Modifier
-                        .weight(1f) // Makes all bars equal width
+                        .weight(1f)
                         .height(8.dp)
                         .background(
                             color = if (i < strength) segmentColors[strength] else Color.DarkGray,
                             shape = RoundedCornerShape(4.dp)
                         )
                 )
-                if (i < 3) Spacer(modifier = Modifier.width(4.dp)) // Space between bars
+                if (i < 3) Spacer(modifier = Modifier.width(4.dp))
             }
         }
     }
 }
 
-// Function to calculate password strength
 fun calculatePasswordStrength(password: String): Int {
     var strength = 0
-    if (password.length >= 6) strength++  // Length Check
-    if (password.any { it.isDigit() }) strength++  // Contains Number
-    if (password.any { !it.isLetterOrDigit() }) strength++  // Contains Special Char
-    if (password.length >= 10) strength++  // Strong Length Check
+    if (password.length >= 6) strength++
+    if (password.any { it.isDigit() }) strength++
+    if (password.any { !it.isLetterOrDigit() }) strength++
+    if (password.length >= 10) strength++
     return strength
 }
 
 
 @Preview
 @Composable
-fun preview(){
+fun Preview() {
     AnimatedLoader(
         modifier = Modifier,
         isLoading = true
-    )
-}
-
-@Composable
-fun LottieAnimations() {
-    val rawComposition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loader_animation))
-    val progress by animateLottieCompositionAsState(composition = rawComposition)
-
-    LottieAnimation(
-        composition = rawComposition,
-        progress = progress,
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Fit,
     )
 }
 
@@ -560,7 +560,7 @@ fun LottieAnimations() {
 @Composable
 fun AnimatedLoader(
     modifier: Modifier = Modifier,
-    isLoading : Boolean
+    isLoading: Boolean
 ) {
     val preLoaderLottieAnimation by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loader_animation))
 
@@ -580,11 +580,11 @@ fun AnimatedLoader(
     )
 
     AnimatedVisibility(visible = isLoading) {
-        Dialog(onDismissRequest = {  }) {
-            Column (
+        Dialog(onDismissRequest = { }) {
+            Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 LottieAnimation(
                     composition = preLoaderLottieAnimation,
                     progress = preLoaderProgress,

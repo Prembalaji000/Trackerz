@@ -1,7 +1,6 @@
 package com.example.portfolioapplication.forgotPasswordScreen
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -30,9 +28,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -40,7 +35,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +50,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -64,14 +57,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.portfolioapplication.R
-import com.example.portfolioapplication.settingScreen.TopBar
 import com.example.portfolioapplication.signUpScreen.AnimatedLoader
 import com.example.portfolioapplication.ui.theme.DarkBlue96
 import com.example.portfolioapplication.ui.theme.Grey50
@@ -82,29 +73,39 @@ import com.example.portfolioapplication.ui.theme.redAccent100
 
 @Preview
 @Composable
-fun ForgotPasswordPreview(){
-    ForgotPasswordScreen(modifier = Modifier, isDarkMode = false, isLoading = false, onBackButtonClick = {}, onButtonClick = {}, isVerify = false, setVerifyDialogVisible = {})
+fun ForgotPasswordPreview() {
+    ForgotPasswordScreen(
+        modifier = Modifier,
+        isDarkMode = false,
+        isLoading = false,
+        onBackButtonClick = {},
+        onButtonClick = {},
+        isVerify = false,
+        setVerifyDialogVisible = {})
 }
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ForgotPasswordScreen(
     modifier: Modifier,
-    isDarkMode : Boolean,
-    isLoading : Boolean,
+    isDarkMode: Boolean,
+    isLoading: Boolean,
     onButtonClick: (String) -> Unit,
     onBackButtonClick: () -> Unit,
     isVerify: Boolean,
-    setVerifyDialogVisible: (Boolean) -> Unit, // <-- add this
-){
+    setVerifyDialogVisible: (Boolean) -> Unit,
+) {
     var email by remember { mutableStateOf("") }
-    val isEmailValid = email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.isEmpty()
+    val isEmailValid =
+        email.endsWith("@mail.com") || email.endsWith("@gmail.com") || email.endsWith("@email.com") || email.isEmpty()
     val emailInteractionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
-        modifier = modifier.fillMaxSize().imePadding(),
+        modifier = modifier
+            .fillMaxSize()
+            .imePadding(),
         containerColor = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor,
         topBar = {
             ForgotPasswordTopBar(onBackButtonClick = onBackButtonClick, isDarkMode = isDarkMode)
@@ -185,7 +186,10 @@ fun ForgotPasswordScreen(
                         unfocusedContainerColor = DarkBlue96,
                         errorContainerColor = Color.White,
                         cursorColor = Color.Black,
-                        selectionColors = TextSelectionColors(handleColor = Grey50, backgroundColor = darkBlue)
+                        selectionColors = TextSelectionColors(
+                            handleColor = Grey50,
+                            backgroundColor = darkBlue
+                        )
                     ),
                     shape = RoundedCornerShape(26.dp),
                     textStyle = TextStyle(
@@ -202,11 +206,17 @@ fun ForgotPasswordScreen(
                         .background(line)
                         .border(
                             width = 1.dp,
-                            brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.15f), Color.Black)),
+                            brush = Brush.linearGradient(
+                                listOf(
+                                    Color.White.copy(alpha = 0.15f),
+                                    Color.Black
+                                )
+                            ),
                             shape = RoundedCornerShape(25.dp)
                         )
                         .clickable {
-                            onButtonClick(email.removeSuffix(" ")) },
+                            onButtonClick(email.removeSuffix(" "))
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -220,11 +230,11 @@ fun ForgotPasswordScreen(
                     }
                 }
             }
-            if(isVerify){
+            if (isVerify) {
                 VerifyEmailDialog(onDismiss = {
                     email = ""
                     setVerifyDialogVisible(false)
-                    }
+                }
                 )
             }
         }
@@ -233,7 +243,7 @@ fun ForgotPasswordScreen(
 
 @Preview(showBackground = false)
 @Composable
-fun VerifyEmailDialogPreview(){
+fun VerifyEmailDialogPreview() {
     VerifyEmailDialog(onDismiss = {})
 }
 
@@ -242,14 +252,14 @@ fun VerifyEmailDialog(onDismiss: () -> Unit) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnClickOutside = false)
-    ){
+    ) {
         Surface(
             modifier = Modifier
                 //  .fillMaxWidth(0.9f)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(16.dp),
             color = bgColor
-        ){
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -299,23 +309,11 @@ fun VerifyEmailDialog(onDismiss: () -> Unit) {
             }
         }
     }
-  /*  AlertDialog(
-        properties = DialogProperties(
-            dismissOnClickOutside = false
-        ),
-        onDismissRequest = onDismiss,
-        containerColor = bgColor,
-        confirmButton = {},
-        text = {
-
-        }
-    )*/
 }
 
 
-
 @Composable
-fun ForgotPasswordTopBar(onBackButtonClick:() -> Unit, isDarkMode: Boolean){
+fun ForgotPasswordTopBar(onBackButtonClick: () -> Unit, isDarkMode: Boolean) {
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )

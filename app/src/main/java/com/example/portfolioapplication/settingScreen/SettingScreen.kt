@@ -1,52 +1,31 @@
 package com.example.portfolioapplication.settingScreen
 
-import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.provider.MediaStore
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Divider
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Check
@@ -55,23 +34,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -79,93 +52,55 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.example.portfolioapplication.R
-import com.example.portfolioapplication.authScreen.LoginCredential
 import com.example.portfolioapplication.capitalizeFirstLetter
-import com.example.portfolioapplication.dashBoardScreen.BottomSheetContent
-import com.example.portfolioapplication.fixImageRotation
-import com.example.portfolioapplication.loginScreen.sharedPreference
 import com.example.portfolioapplication.signUpScreen.AnimatedLoader
-import com.example.portfolioapplication.ui.theme.DarkBlue96
 import com.example.portfolioapplication.ui.theme.Grey30
 import com.example.portfolioapplication.ui.theme.Grey50
 import com.example.portfolioapplication.ui.theme.bgColor
 import com.example.portfolioapplication.ui.theme.darkBlue
 import com.example.portfolioapplication.ui.theme.line
-import com.example.portfolioapplication.ui.theme.redAccent100
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
-import kotlin.math.min
 
 @Preview
 @Composable
-fun SettingPreview(){
+fun SettingPreview() {
     SettingScreen(
         modifier = Modifier,
-        onBackButtonClick = {},
         onSignOut = {},
         initialUserName = "User Name",
         userImageUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
         userEmail = "UserName@example.com",
-        addButtonClick = {_,_ ->},
+        addButtonClick = { _, _ -> },
         isRefresh = false,
         isDarkMode = false,
         onThemeToggle = {},
         onCloudBackUp = {},
         isUploadSuccess = false,
-        getData = {}
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(
     modifier: Modifier,
-    onBackButtonClick: () -> Unit,
     onSignOut: () -> Unit,
     initialUserName: String,
     userImageUrl: String,
@@ -176,7 +111,6 @@ fun SettingScreen(
     onThemeToggle: () -> Unit,
     onCloudBackUp: () -> Unit,
     isUploadSuccess: Boolean,
-    getData: () -> Unit
 ) {
     var userName by remember { mutableStateOf(initialUserName) }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -228,7 +162,7 @@ fun SettingScreen(
                 }
             )
         }
-    ){
+    ) {
         ModalBottomSheetLayout(
             sheetState = editImageSheetState,
             sheetShape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp),
@@ -260,12 +194,14 @@ fun SettingScreen(
                 modifier = modifier.fillMaxSize(),
                 containerColor = if (isDarkMode) Color.White.copy(alpha = 0.4f) else bgColor,
                 topBar = {
-                    TopBar(onBackButtonClick = onBackButtonClick, isDarkMode = isDarkMode)
+                    TopBar(isDarkMode = isDarkMode)
                 },
                 content = { paddingValue ->
                     AnimatedLoader(isLoading = isRefresh)
                     Column(
-                        modifier = modifier.padding(paddingValue).padding(top = 16.dp),
+                        modifier = modifier
+                            .padding(paddingValue)
+                            .padding(top = 16.dp),
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -301,7 +237,11 @@ fun SettingScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(12.dp)
-                                    .border(width = 1.dp, color = Grey50, shape = RoundedCornerShape(16.dp))
+                                    .border(
+                                        width = 1.dp,
+                                        color = Grey50,
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
                                     .clip(RoundedCornerShape(16.dp)),
                                 colors = CardDefaults.cardColors(
                                     containerColor = Grey30
@@ -341,11 +281,14 @@ fun SettingScreen(
                                         )
                                     )
                                 }
-                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Grey50)
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = Grey50
+                                )
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 20.dp,vertical = 10.dp),
+                                        .padding(horizontal = 20.dp, vertical = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -399,12 +342,12 @@ fun SettingScreen(
 
 @Preview
 @Composable
-fun Preview(){
-    TopBar(onBackButtonClick = {}, isDarkMode = false)
+fun Preview() {
+    TopBar(isDarkMode = false)
 }
 
 @Composable
-fun TopBar(onBackButtonClick:() -> Unit, isDarkMode: Boolean){
+fun TopBar(isDarkMode: Boolean) {
     val customFont = FontFamily(
         Font(R.font.exo2_extrabold, FontWeight.Normal)
     )
@@ -417,18 +360,6 @@ fun TopBar(onBackButtonClick:() -> Unit, isDarkMode: Boolean){
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 18.dp)
         ) {
-            /*Image(
-                modifier = Modifier
-                    .size(32.dp)
-                    .align(Alignment.CenterStart)
-                    .clickable {
-                        onBackButtonClick()
-                    },
-                painter = painterResource(id = R.drawable.ic_back),
-                contentDescription = "back_icon",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(if (isDarkMode) bgColor else Color.White)
-            )*/
             Text(
                 text = stringResource(id = R.string.setting),
                 fontSize = 18.sp,
@@ -449,7 +380,7 @@ fun TopBar(onBackButtonClick:() -> Unit, isDarkMode: Boolean){
 
 @Preview
 @Composable
-fun ProfilePreview(){
+fun ProfilePreview() {
     ProfileView(
         userName = "User Name",
         userImageUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
@@ -461,11 +392,11 @@ fun ProfilePreview(){
 
 @Composable
 fun ProfileView(
-    userName : String,
-    userImageUrl : String,
-    userEmail : String,
+    userName: String,
+    userImageUrl: String,
+    userEmail: String,
     isDarkMode: Boolean
-){
+) {
     val context = LocalContext.current
     println("userDetail: $userName, $userEmail $userImageUrl")
     Column(
@@ -511,10 +442,7 @@ fun ProfileView(
 }
 
 @Composable
-fun SignOutButton(onSignOut:() -> Unit, title: String){
-    val gradientBrush = Brush.verticalGradient(
-        colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
-    )
+fun SignOutButton(onSignOut: () -> Unit, title: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -541,7 +469,7 @@ fun SignOutButton(onSignOut:() -> Unit, title: String){
 @Composable
 fun EditProfile(
     modifier: Modifier,
-    userName : String,
+    userName: String,
     onClose: () -> Unit,
     onCancelClick: () -> Unit,
     imageUri: String,
@@ -551,23 +479,8 @@ fun EditProfile(
 ) {
     var name by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
     var isFocused by remember { mutableStateOf(false) }
     val nameInteractionSource = remember { MutableInteractionSource() }
-    val amountInteractionSource = remember { MutableInteractionSource() }
-    val context = LocalContext.current
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            context.contentResolver.takePersistableUriPermission(
-                it,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            selectedImageUri = it
-        }
-    }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
@@ -641,7 +554,10 @@ fun EditProfile(
                 focusedBorderColor = Grey50,
                 unfocusedBorderColor = Grey50,
                 cursorColor = Color.Black,
-                selectionColors = TextSelectionColors(handleColor = Grey50, backgroundColor = darkBlue)
+                selectionColors = TextSelectionColors(
+                    handleColor = Grey50,
+                    backgroundColor = darkBlue
+                )
             ),
         )
         Spacer(modifier = Modifier.padding(6.dp))
@@ -663,8 +579,7 @@ fun EditProfile(
                 .clickable {
                     keyboardController?.hide()
                     onEditButtonClick()
-                    //imagePickerLauncher.launch("image/*")
-                           },
+                },
             contentAlignment = Alignment.Center
         ) {
             if (imageUri.isNotEmpty()) {
@@ -710,7 +625,7 @@ fun EditProfile(
                 .background(line)
                 .clickable {
                     keyboardController?.hide()
-                    if (name.isEmpty() && imageUri.isEmpty()){
+                    if (name.isEmpty() && imageUri.isEmpty()) {
                         onCancelClick()
                     } else {
                         addButtonClick(name, imageUri)
@@ -736,7 +651,7 @@ fun EditProfile(
 
 @Preview
 @Composable
-fun EditProfilePreview(){
+fun EditProfilePreview() {
     EditImage(
         modifier = Modifier,
         onImageSelected = {},
@@ -793,36 +708,14 @@ fun EditImage(
         Spacer(modifier = Modifier.padding(2.dp))
         Divider(color = Grey50, thickness = 1.dp)
         Spacer(modifier = Modifier.padding(10.dp))
-       /* Row(
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            defaultImages.forEach {resId ->
-                val imageUri = Uri.parse("android.resource://${context.packageName}/$resId")
-                Image(
-                    painter = painterResource(id = resId),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(Color.Gray)
-                        .clickable {
-                            onImageSelected(imageUri.toString())
-                            println("imageUri: $imageUri")
-                        }
-                )
-            }
-        }*/
         LazyVerticalGrid(
             modifier = Modifier.fillMaxWidth(),
             columns = GridCells.Fixed(5),
             userScrollEnabled = false,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
-        ){
-            items(defaultImages){resId->
+        ) {
+            items(defaultImages) { resId ->
                 val imageUri = Uri.parse("android.resource://${context.packageName}/$resId")
                 Image(
                     painter = painterResource(id = resId),
